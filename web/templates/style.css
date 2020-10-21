@@ -1,0 +1,6 @@
+body, html {
+    background: linear-gradient(-20deg, #6e45e2 0%, #88d3ce 100%) no-repeat center center fixed;
+    background-size: cover;
+}
+
+.contentBox { margin-top: 2rem; }

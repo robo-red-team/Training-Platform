@@ -25,4 +25,4 @@ api.add_resource(CSS, "/css")
 
 # -== Start server ==-
 def StartServer(Port):
-    app.run(threaded=True, debug=True, port=Port, host="0.0.0.0")
+    app.run(threaded=True, debug=False, port=Port, host="0.0.0.0")

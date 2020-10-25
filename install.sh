@@ -1,16 +1,26 @@
 #!/bin/bash
 echo -e "\n-==INSTALL FOR ROBO RED TEAM TRAINING PLATFORM==-\n"
 
+# Dependencies
 packages="python python-pip docker"
-pythonDependencies="flask flask_restful docker" 
+pythonDependencies="flask flask_restful docker"
+systemctlStart="docker" 
+
+# Common things for pacman- and apt based systems
+CommonSetup() {
+    pip install $pythonDependencies
+    systemctl enable $systemctlStart
+    systemctl start $systemctlStart
+}
 
 # Installation of needed packages
 if [ "$1" == "pacman" ]; then
     pacman -S $packages
-    pip install $pythonDependencies
+    CommonSetup
 elif [ "$1" == "apt" ]; then
+    apt update
     apt install $packages
-    pip install $pythonDependencies
+    CommonSetup
 else
     echo -e "Please manually install: $packages\nand these Python libaries: $pythonDependencies\nOr run the script with 'pacman' or 'apt' as param."
 fi

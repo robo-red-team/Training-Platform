@@ -1,6 +1,8 @@
 import sys
-from flask import Flask, make_response, render_template
-from flask_restful import Resource, Api
+import requests
+import re
+from flask import Flask, make_response, render_template, request
+from flask_restful import Resource, Api, reqparse
 from app.dockerController import SpawnContainer, GetContainerIP
 
 app = Flask(__name__)
@@ -19,13 +21,39 @@ def MakeResponse(fileLocation, mimeType):
     response.headers['Content-Type'] = mimeType
     return response
 
+# Validate key, by making a request to the auth micro service
+def ValidateKey(key):
+    req = requests.post("http://" + authServiceIP + ":8855/auth?key=" + key)
+    responseText = LimitInputChars(req.text)
+    if str(responseText) == str("Valid"):
+        return True
+    else:
+        return False 
+
+# Limit the amount of valid input chars, to increase security
+def LimitInputChars(string):
+    return str(re.sub("[^0-9a-zA-Z_\-.: ]", "", str(string)))
+
 # -== Endpoint functionality ==-
-class Root(Resource):
-    def get(self):
-        return "I am (g)root"
+class SpawnMachine(Resource):
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument("key")
+        parser.add_argument("machineName")
+        args = parser.parse_args()
+
+        if ValidateKey(str(LimitInputChars(args["key"]))):
+            try:
+                spawnID = SpawnContainer(str(LimitInputChars(args["machineName"])))
+                spawnIP = GetContainerIP(spawnID)
+                return "Spawn," + str(spawnID) + "," + str(spawnIP)
+            except:
+                return "Failed to spawn :("
+        else:
+            return "Invalid key"
 
 # -== Endpoints ==-
-api.add_resource(Root, "/")
+api.add_resource(SpawnMachine, "/spawnMachine")
 
 # -== Start server ==-
 # Validate input, if correct then start server

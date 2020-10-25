@@ -3,10 +3,12 @@ import requests
 import re
 from flask import Flask, make_response, render_template, request
 from flask_restful import Resource, Api, reqparse
+from flask_cors import CORS
 from app.dockerController import SpawnContainer, GetContainerIP
 
 app = Flask(__name__)
 api = Api(app)
+CORS(app)
 
 # -== SpawnMicroServices ==-
 authService = SpawnContainer("auth_service:latest")

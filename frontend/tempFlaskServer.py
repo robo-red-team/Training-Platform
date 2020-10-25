@@ -1,9 +1,11 @@
 import sys
 from flask import Flask, make_response, render_template
 from flask_restful import Resource, Api
+from flask_cors import CORS
 
 app = Flask(__name__)
 api = Api(app)
+CORS(app)
 
 # -== Helper functions ==-
 # Function to return file and mime-type, as a Flask response
@@ -16,7 +18,7 @@ def MakeResponse(fileLocation, mimeType):
 # -== Endpoint functionality ==-
 class Root(Resource):
     def get(self):
-        return MakeResponse("index.html", "text/html")
+        return MakeResponse("demoIndex.html", "text/html")
 
 class CSS(Resource):
     def get(self):

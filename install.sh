@@ -3,7 +3,7 @@ echo -e "\n-==INSTALL FOR ROBO RED TEAM TRAINING PLATFORM==-\n"
 
 # Dependencies
 packages="python python-pip docker"
-pythonDependencies="flask flask_restful docker"
+pythonDependencies="flask flask_restful flask_cors docker"
 systemctlStart="docker" 
 
 # Common things for pacman- and apt based systems

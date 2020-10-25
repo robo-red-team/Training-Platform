@@ -4,12 +4,12 @@ Training platform for the Robo-Red-Team project.
 ## How to run:
 To run this, you need to be on a Linux-based system. First run:
 ```
-bash install.sh
+bash install.sh [pacman/apt]
 ```
-This will install the Python dependencies, and tell you which things you need to do manually *(Due to differences in Linux distribution package manegers)*
+This will install the needed packages and Python dependencies. There is suport for 'pacman' and 'apt', if no param is given, then it will tell which packages to install.
 
 Once you have installed the needed packages, then you can start the service with:
 ```
-python3 controller.py
+bash start.sh
 ```
 *Note: You might have to run as root (sudo), in case Docker needs these priviliges.*

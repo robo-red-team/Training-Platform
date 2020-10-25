@@ -1,9 +1,14 @@
 import sys
 from flask import Flask, make_response, render_template
 from flask_restful import Resource, Api
+from app.dockerController import SpawnContainer, GetContainerIP
 
 app = Flask(__name__)
 api = Api(app)
+
+# -== SpawnMicroServices ==-
+authService = SpawnContainer("auth_service:latest")
+authServiceIP = GetContainerIP(authService)
 
 # -== Helper functions ==-
 

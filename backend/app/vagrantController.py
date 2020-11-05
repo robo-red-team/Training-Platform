@@ -29,17 +29,17 @@ def VagrantController(FolderPath, Action):
             v.destroy()
         elif str(Action) == "stop":
             v.halt()
-        elif str(Action) == "ipAndPort":
-            return {"ip": str(v.hostname()), "port": str(v.port())}
+        elif str(Action) == "ip":
+            return str(v.hostname())
         else:
-            return False
+            return "Invalid Option"
 
         return True # as action worked
     else:
-        return False
+        return "Invalid Path"
 
 # Spawn/build a Vagrant machine, and run it
-def SpawnMachine(FolderPath):
+def SpawnVagrantMachine(FolderPath):
     return VagrantController(FolderPath, "spawn")
 
 # Remove a Vagrant machine, and connected files
@@ -51,5 +51,5 @@ def StopMachine(FolderPath):
     return VagrantController(FolderPath, "stop")
 
 # Get the Vagrant machine's IP and port as dictionary
-def GetMachineIPandPort(FolderPath):
-    return VagrantController(FolderPath, "ipAndPort")
+def GetMachineIP(FolderPath):
+    return VagrantController(FolderPath, "ip")

@@ -6,6 +6,7 @@
     },
     {
         "name": "dockerTester",
-        "type": "docker" 
+        "type": "docker",
+        "imageName": "docker_tester:latest" 
     }
 ]

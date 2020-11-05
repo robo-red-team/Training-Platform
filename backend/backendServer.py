@@ -1,10 +1,13 @@
 import sys
 import requests
 import re
+import json
+import urllib
 from flask import Flask, make_response, render_template, request
 from flask_restful import Resource, Api, reqparse
 from flask_cors import CORS
 from app.dockerController import SpawnContainer, GetContainerIP
+from app.vagrantController import SpawnVagrantMachine, GetMachineIP
 
 app = Flask(__name__)
 api = Api(app)
@@ -38,7 +41,19 @@ def ValidateKey(key):
 def LimitInputChars(string):
     return str(re.sub("[^0-9a-zA-Z_\-.: ]", "", str(string)))
 
+# Check if machine exists, and return info if it does
+def GetMachineInfo(Name):
+    req = urllib.request.urlopen("http://" + datastoreServiceIP + ":8855/machineInfo?name=" + Name)
+    if(req.getcode() == 200):
+        data = req.read()
+        if str(LimitInputChars(data.decode("ascii"))) == str("Invalid"):
+            return False
+        else:
+            return json.loads(data)
+
 # -== Endpoint functionality ==-
+
+# Spawn a machine if API key is correct, and machine exists
 class SpawnMachine(Resource):
     def post(self):
         parser = reqparse.RequestParser()
@@ -46,13 +61,28 @@ class SpawnMachine(Resource):
         parser.add_argument("machineName")
         args = parser.parse_args()
 
+        # Make sure API key is correct
         if ValidateKey(str(LimitInputChars(args["key"]))):
-            try:
-                spawnID = SpawnContainer(str(LimitInputChars(args["machineName"])))
-                spawnIP = GetContainerIP(spawnID)
-                return "Spawn," + str(spawnID) + "," + str(spawnIP)
-            except:
-                return "Failed to spawn :("
+            # Make sure machine exists, and which type to spawn
+            machineInfo = GetMachineInfo(str(LimitInputChars(args["machineName"])))
+            # If no machine is found
+            if machineInfo == False:
+                return "Invalid Machine"
+            # If it is a Vagrant machine
+            elif str(machineInfo["type"]) == "vagrant":
+                spawned = SpawnVagrantMachine(machineInfo["pathFromRoot"])
+                if spawned == True:
+                    return "Spawn," + str(machineInfo["name"]) + "," + str(GetMachineIP(str(machineInfo["pathFromRoot"])))
+                else:
+                    return "Failed to spawn :("
+            # If it is a Docker machine
+            elif str(machineInfo["type"]) == "docker":
+                try:
+                    spawnID = SpawnContainer(str(machineInfo["imageName"]))
+                    spawnIP = GetContainerIP(spawnID)
+                    return "Spawn," + str(spawnID) + "," + str(spawnIP)
+                except:
+                    return "Failed to spawn :("
         else:
             return "Invalid key"
 

@@ -1,0 +1,11 @@
+[
+    {
+        "name": "defaultUbuntu",
+        "type": "vagrant",
+        "pathFromRoot": "./machines/vagrant/defaultUbuntu/"
+    },
+    {
+        "name": "dockerTester",
+        "type": "docker" 
+    }
+]

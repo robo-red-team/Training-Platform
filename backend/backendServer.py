@@ -13,6 +13,8 @@ CORS(app)
 # -== SpawnMicroServices ==-
 authService = SpawnContainer("auth_service:latest")
 authServiceIP = GetContainerIP(authService)
+datastoreService = SpawnContainer("datastore_service:latest")
+datastoreServiceIP = GetContainerIP(datastoreService)
 
 # -== Helper functions ==-
 

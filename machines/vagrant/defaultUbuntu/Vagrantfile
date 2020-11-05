@@ -1,0 +1,10 @@
+Vagrant.configure("2") do |config|
+    # Name on Vagrant Cloud
+    config.vm.box = "ubuntu/trusty64"
+    # Vagrant name of machine (for referencing)
+    config.vm.define :DefaultUbuntu 
+    # Hostname inside of machine
+    config.vm.hostname = "robo-redteam"
+    # Disable synced folder, to increse security
+    config.vm.synced_folder ".", "/vagrant", disabled: true
+end

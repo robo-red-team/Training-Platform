@@ -2,8 +2,8 @@
 echo -e "\n-==INSTALL FOR ROBO RED TEAM TRAINING PLATFORM==-\n"
 
 # Dependencies
-packages="python python-pip docker"
-pythonDependencies="flask flask_restful flask_cors docker"
+packages="python python-pip docker vagrant"
+pythonDependencies="flask flask_restful flask_cors docker python-vagrant"
 systemctlStart="docker" 
 
 # Common things for pacman- and apt based systems

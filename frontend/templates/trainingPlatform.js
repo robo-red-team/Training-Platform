@@ -46,7 +46,7 @@ function GetCampaignInfo() {
             const campaignInfo = JSON.parse(httpReq.response)
 
             // Add info to HTML, and HTML needed to spawn campaign
-            let infoHTML = `<h4 class="text-center">${campaignInfo["name"]}</h4><p class="text-center">${campaignInfo["description"]}</p>`
+            let infoHTML = `<h3 class="text-center">Campaign: ${campaignInfo["name"]}</h3><p class="text-center">${campaignInfo["description"]}</p>`
             infoHTML += `<div class="form-group text-center"><input type="text" id="key" placeholder="Key"><button class="btn btn-secondary text-center" onclick="SpawnCampaign()">Spawn Campaign</button></div>`
 
             // Write it to the document
@@ -59,7 +59,37 @@ function GetCampaignInfo() {
 
 // Spawn the selected campaign, if the API key is correct
 function SpawnCampaign() {
-    console.log("Spawned")
+    // Get currently selected name, and hashed key value
+    campaignName = document.getElementById("campaignSelect").value
+    plainKey = document.getElementById("key").value
+    hashedKey = GetHashedKey(plainKey)
+    
+    // Make async request to get spawn the campaign, and get data
+    let httpReq = new XMLHttpRequest();
+    httpReq.onreadystatechange = function() {
+        // When we get a response, do this:
+        if (httpReq.readyState == XMLHttpRequest.DONE) {
+            const spawnedInfo = JSON.parse(httpReq.response)
+            
+            // Make the HTML table to show spawned machine info
+            ids = []
+            ips = []
+            for (i = 0; i < spawnedInfo.length; i++) {
+                ids.push(spawnedInfo[i]["id"])
+                ips.push(spawnedInfo[i]["ip"])
+            }
+            let infoHTML = `<b><h2 class="text-center">Spawned Machines:</h2></b><p class="text-center">Here is the list of spawned machines, which belong to your campaign.</p><table class="table"><thead><tr><th scope="col">Machine ID</th><th scope="col">Local IP</th></tr></thead><tbody>`
+            for (i = 0; i < ids.length; i++) {
+                infoHTML += `<tr><td>${ids[i]}</td><td>${ips[i]}</td></tr>`
+            }
+            infoHTML += `</tbody></table>`
+
+            // Write it to the document
+            document.getElementById("spawnedCampaignInfo").innerHTML = infoHTML
+        }
+    }
+    httpReq.open("post", `http://localhost:8855/campaignSpawn?name=${campaignName}&key=${hashedKey}`, true);
+    httpReq.send();
 }
 
 // -=== Initialization ===-

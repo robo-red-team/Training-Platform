@@ -34,7 +34,7 @@ def ValidateKey(key):
 
 # Limit the amount of valid input chars, to increase security
 def LimitInputChars(string):
-    return str(re.sub("[^0-9a-zA-Z_\-.: \/?=]", "", str(string)))
+    return str(re.sub("[^0-9a-zA-Z_\-.: \/?=&]", "", str(string)))
 
 # Get JSON data from API, given the URL with params
 def GetJSONDataFromAPI(UrlWithParams):
@@ -53,38 +53,47 @@ def InitAuthKey(MachineIP):
     cleanKey = str(LimitInputChars(sys.argv[2]))
     requests.post("http://" + str(MachineIP) + ":8855/initKey?key=" + str(cleanKey))
 
+# Spawn a machine, based upon the machine name
+def SpawnMachine(MachineName):
+    # Make sure machine exists, and which type to spawn
+    machineInfo = GetJSONDataFromAPI("http://" + datastoreServiceIP + ":8855/machineInfo?name=" + str(LimitInputChars(MachineName)))
+    # If no machine is found
+    if machineInfo == False:
+        return False
+    # If it is a Vagrant machine
+    elif str(machineInfo["type"]) == "vagrant":
+        spawned = SpawnVagrantMachine(machineInfo["pathFromRoot"])
+        if spawned == True:
+            return {"id": str(machineInfo["name"]), "ip": str(GetMachineIP(str(machineInfo["pathFromRoot"])))}
+        else:
+            return False
+    # If it is a Docker machine
+    elif str(machineInfo["type"]) == "docker":
+        try:
+            spawnID = SpawnContainer(str(machineInfo["imageName"]))
+            spawnIP = GetContainerIP(spawnID)
+            return {"id": str(spawnID), "ip": str(spawnIP)}
+        except:
+            return False
+
 # -== Endpoint functionality ==-
 
-# Spawn a machine if API key is correct, and machine exists
-class SpawnMachine(Resource):
+# Spawn a campaign if API key is correct
+class SpawnCampaign(Resource):
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument("key")
-        parser.add_argument("machineName")
+        parser.add_argument("name")
         args = parser.parse_args()
 
         # Make sure API key is correct
         if ValidateKey(str(LimitInputChars(args["key"]))):
-            # Make sure machine exists, and which type to spawn
-            machineInfo = GetJSONDataFromAPI("http://" + datastoreServiceIP + ":8855/machineInfo?name=" + str(LimitInputChars(args["machineName"])))
-            # If no machine is found
-            if machineInfo == False:
-                return "Invalid Machine"
-            # If it is a Vagrant machine
-            elif str(machineInfo["type"]) == "vagrant":
-                spawned = SpawnVagrantMachine(machineInfo["pathFromRoot"])
-                if spawned == True:
-                    return "Spawn," + str(machineInfo["name"]) + "," + str(GetMachineIP(str(machineInfo["pathFromRoot"])))
-                else:
-                    return "Failed to spawn :("
-            # If it is a Docker machine
-            elif str(machineInfo["type"]) == "docker":
-                try:
-                    spawnID = SpawnContainer(str(machineInfo["imageName"]))
-                    spawnIP = GetContainerIP(spawnID)
-                    return "Spawn," + str(spawnID) + "," + str(spawnIP)
-                except:
-                    return "Failed to spawn :("
+            campaignInfo = GetJSONDataFromAPI("http://" + datastoreServiceIP + ":8855/campaignInfo?name=" + str(LimitInputChars(args["name"])))
+            # Spawn machines, and store data in list
+            spawnInfo = []
+            for machine in campaignInfo["machines"]:
+                spawnInfo.append(SpawnMachine(machine))
+            return spawnInfo
         else:
             return "Invalid key"
 
@@ -107,7 +116,7 @@ class CampaignInfo(Resource):
             return {"name": allInfo["name"], "description": allInfo["description"]}
 
 # -== Endpoints ==-
-api.add_resource(SpawnMachine, "/spawnMachine")
+api.add_resource(SpawnCampaign, "/campaignSpawn")
 api.add_resource(CampaignNames, "/campaignNames")
 api.add_resource(CampaignInfo, "/campaignInfo")
 

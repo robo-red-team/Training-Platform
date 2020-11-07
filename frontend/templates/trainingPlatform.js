@@ -1,3 +1,5 @@
+// -=== Functions ===-
+
 // Spawn a machine on the host system
 function SpawnMachine() {
     let httpReq = new XMLHttpRequest();
@@ -22,3 +24,26 @@ function GetHashedKey() {
     md.update(keyPlain, "utf8");  
     return md.digest().toHex();  
 } 
+
+// Fill campaign options, based upon data from backend (async request)
+function FillCampaignInfo() {
+    let httpReq = new XMLHttpRequest();
+    // When we get a response, do this:
+    httpReq.onreadystatechange = function() {
+        if (httpReq.readyState == XMLHttpRequest.DONE) {
+            const options = JSON.parse(httpReq.response)
+            let optionsHTML = ""
+
+            // Generate HTML options
+            for (option in options) { optionsHTML += `<option vlaue="${options[option]}">${options[option]}</option>` }
+
+            // Write it to the document
+            document.getElementById("campaignSelect").innerHTML = optionsHTML
+        }
+    }
+    httpReq.open("get", `http://localhost:8855/campaignNames`, true);
+    httpReq.send();  
+}
+
+// -=== Initialization ===-
+FillCampaignInfo()

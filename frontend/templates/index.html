@@ -7,7 +7,6 @@
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/forge/0.8.2/forge.all.min.js"></script>
-        <script src="/js"></script>
     </head>
     <body>
         <div class="contentBox">
@@ -21,7 +20,7 @@
                     <div class="col-3">
                         <div class="form-group text-center">
                             <input type="text" id="key" placeholder="Key">
-                            <input type="text" id="machineName" placeholder="MachineName">
+                            <select class="form-control" id="campaignSelect"></select>
                             <button class="btn btn-secondary text-center" onclick="SpawnMachine()">Spawn Machine</button>
                         </div>
                     </div>
@@ -33,5 +32,6 @@
                 </div>
             </div>
         </div>
+        <script src="/js"></script>
     </body>
 </html>

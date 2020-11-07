@@ -34,11 +34,11 @@ def ValidateKey(key):
 
 # Limit the amount of valid input chars, to increase security
 def LimitInputChars(string):
-    return str(re.sub("[^0-9a-zA-Z_\-.: ]", "", str(string)))
+    return str(re.sub("[^0-9a-zA-Z_\-.: \/?=]", "", str(string)))
 
-# Check if machine exists, and return info if it does
-def GetMachineInfo(Name):
-    req = urllib.request.urlopen("http://" + datastoreServiceIP + ":8855/machineInfo?name=" + Name)
+# Get JSON data from API, given the URL with params
+def GetJSONDataFromAPI(UrlWithParams):
+    req = urllib.request.urlopen(str(LimitInputChars(UrlWithParams)))
     if(req.getcode() == 200):
         data = req.read()
         if str(LimitInputChars(data.decode("ascii"))) == str("Invalid"):
@@ -66,7 +66,7 @@ class SpawnMachine(Resource):
         # Make sure API key is correct
         if ValidateKey(str(LimitInputChars(args["key"]))):
             # Make sure machine exists, and which type to spawn
-            machineInfo = GetMachineInfo(str(LimitInputChars(args["machineName"])))
+            machineInfo = GetJSONDataFromAPI("http://" + datastoreServiceIP + ":8855/machineInfo?name=" + str(LimitInputChars(args["machineName"])))
             # If no machine is found
             if machineInfo == False:
                 return "Invalid Machine"
@@ -88,8 +88,14 @@ class SpawnMachine(Resource):
         else:
             return "Invalid key"
 
+# Get names of all campaigns
+class CampaignNames(Resource):
+    def get(self):
+        return GetJSONDataFromAPI("http://" + datastoreServiceIP + ":8855/campaigns")
+
 # -== Endpoints ==-
 api.add_resource(SpawnMachine, "/spawnMachine")
+api.add_resource(CampaignNames, "/campaignNames")
 
 # -== SpawnMicroServices ==-
 authService = SpawnContainer("auth_service:latest")

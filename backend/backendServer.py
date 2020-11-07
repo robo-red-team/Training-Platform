@@ -88,14 +88,28 @@ class SpawnMachine(Resource):
         else:
             return "Invalid key"
 
-# Get names of all campaigns
+# Send names of all campaigns
 class CampaignNames(Resource):
     def get(self):
         return GetJSONDataFromAPI("http://" + datastoreServiceIP + ":8855/campaigns")
 
+# Send public info about campaigns
+class CampaignInfo(Resource):
+    def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument("name")
+        args = parser.parse_args()
+        # Get all info, and make sure the name was correct
+        allInfo = GetJSONDataFromAPI("http://" + datastoreServiceIP + ":8855/campaignInfo?name=" + str(LimitInputChars(args["name"])))
+        if allInfo == False:
+            return {"name": "ERROR", "description": "Error getting campaign data!"}
+        else:
+            return {"name": allInfo["name"], "description": allInfo["description"]}
+
 # -== Endpoints ==-
 api.add_resource(SpawnMachine, "/spawnMachine")
 api.add_resource(CampaignNames, "/campaignNames")
+api.add_resource(CampaignInfo, "/campaignInfo")
 
 # -== SpawnMicroServices ==-
 authService = SpawnContainer("auth_service:latest")

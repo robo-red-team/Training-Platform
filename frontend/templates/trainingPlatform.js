@@ -1,17 +1,5 @@
 // -=== Functions ===-
 
-// Spawn a machine on the host system
-function SpawnMachine() {
-    let httpReq = new XMLHttpRequest();
-    httpReq.onreadystatechange = function() {
-        if (httpReq.readyState == XMLHttpRequest.DONE) {
-            document.getElementById("TextOutput").innerHTML = httpReq.response;
-        }
-    }
-    httpReq.open("post", `http://localhost:8855/spawnMachine?key=${GetHashedKey()}&machineName=${document.getElementById("machineName").value}`, true);
-    httpReq.send();
-}
-
 // Generate a SHA256 hash of key
 function GetHashedKey() {
     // Add salt to avoid rainbow table attacks
@@ -28,8 +16,8 @@ function GetHashedKey() {
 // Fill campaign options, based upon data from backend (async request)
 function FillCampaignInfo() {
     let httpReq = new XMLHttpRequest();
-    // When we get a response, do this:
     httpReq.onreadystatechange = function() {
+        // When we get a response, do this:
         if (httpReq.readyState == XMLHttpRequest.DONE) {
             const options = JSON.parse(httpReq.response)
             let optionsHTML = ""
@@ -43,6 +31,35 @@ function FillCampaignInfo() {
     }
     httpReq.open("get", `http://localhost:8855/campaignNames`, true);
     httpReq.send();  
+}
+
+// Get campaign info, and show it on the document
+function GetCampaignInfo() {
+    // Get currently selected name
+    campaignName = document.getElementById("campaignSelect").value
+    
+    // Make async request to get the data
+    let httpReq = new XMLHttpRequest();
+    httpReq.onreadystatechange = function() {
+        // When we get a response, do this:
+        if (httpReq.readyState == XMLHttpRequest.DONE) {
+            const campaignInfo = JSON.parse(httpReq.response)
+
+            // Add info to HTML, and HTML needed to spawn campaign
+            let infoHTML = `<h4 class="text-center">${campaignInfo["name"]}</h4><p class="text-center">${campaignInfo["description"]}</p>`
+            infoHTML += `<div class="form-group text-center"><input type="text" id="key" placeholder="Key"><button class="btn btn-secondary text-center" onclick="SpawnCampaign()">Spawn Campaign</button></div>`
+
+            // Write it to the document
+            document.getElementById("campaignInfo").innerHTML = infoHTML
+        }
+    }
+    httpReq.open("get", `http://localhost:8855/campaignInfo?name=${campaignName}`, true);
+    httpReq.send();
+}
+
+// Spawn the selected campaign, if the API key is correct
+function SpawnCampaign() {
+    console.log("Spawned")
 }
 
 // -=== Initialization ===-

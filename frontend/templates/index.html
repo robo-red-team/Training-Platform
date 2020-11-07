@@ -5,18 +5,30 @@
         <meta charset="UTF-8">
         <link rel="stylesheet" href="/css"/>
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/forge/0.8.2/forge.all.min.js"></script>
+        <script src="/js"></script>
     </head>
     <body>
         <div class="contentBox">
             <div class="container">
-                <div class="row">
+                <div class="row justify-content-center">
                     <div class="col-12">
                         <h1 class="text-center"><b>Robo Red Team: Training Platform</b></h1>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col">
-                        <!--Vue component to be placed here-->
+                <div class="row justify-content-center">
+                    <div class="col-3">
+                        <div class="form-group text-center">
+                            <input type="text" id="key" placeholder="Key">
+                            <input type="text" id="machineName" placeholder="MachineName">
+                            <button class="btn btn-secondary text-center" onclick="SpawnMachine()">Spawn Machine</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row justify-content-center">
+                    <div class="col-6">
+                        <h4 class="text-center" id="TextOutput"></h4>
                     </div>
                 </div>
             </div>

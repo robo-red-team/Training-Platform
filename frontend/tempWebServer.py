@@ -18,15 +18,20 @@ def MakeResponse(fileLocation, mimeType):
 # -== Endpoint functionality ==-
 class Root(Resource):
     def get(self):
-        return MakeResponse("demoIndex.html", "text/html")
+        return MakeResponse("index.html", "text/html")
 
 class CSS(Resource):
     def get(self):
         return MakeResponse("style.css", "text/css")
 
+class JS(Resource):
+    def get(self):
+        return MakeResponse("trainingPlatform.js", "text/javascript")
+
 # -== Endpoints ==-
 api.add_resource(Root, "/")
 api.add_resource(CSS, "/css")
+api.add_resource(JS, "/js")
 
 # -== Start server ==-
 # Validate input, if correct then start server

@@ -1,0 +1,12 @@
+[
+    {
+        "name": "Test1",
+        "machines": ["dockerTester"],
+        "description": "A very nice tester campaign."
+    },
+    {
+        "name": "Test2",
+        "machines": ["dockerTester", "defaultUbuntu"],
+        "description": "A tester campaign which spawns both machines."
+    }
+]

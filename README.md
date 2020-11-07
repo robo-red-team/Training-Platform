@@ -10,6 +10,6 @@ This will install the needed packages and Python dependencies. There is suport f
 
 Once you have installed the needed packages, then you can start the service with:
 ```
-bash start.sh
+bash start.sh [API key]
 ```
 *Note: You might have to run as root (sudo), in case Docker needs these priviliges.*

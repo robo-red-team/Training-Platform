@@ -3,6 +3,7 @@ import requests
 import re
 import json
 import urllib
+import time
 from flask import Flask, make_response, render_template, request
 from flask_restful import Resource, Api, reqparse
 from flask_cors import CORS
@@ -12,12 +13,6 @@ from app.vagrantController import SpawnVagrantMachine, GetMachineIP
 app = Flask(__name__)
 api = Api(app)
 CORS(app)
-
-# -== SpawnMicroServices ==-
-authService = SpawnContainer("auth_service:latest")
-authServiceIP = GetContainerIP(authService)
-datastoreService = SpawnContainer("datastore_service:latest")
-datastoreServiceIP = GetContainerIP(datastoreService)
 
 # -== Helper functions ==-
 
@@ -50,6 +45,13 @@ def GetMachineInfo(Name):
             return False
         else:
             return json.loads(data)
+
+# Initialize key in Auth Service
+def InitAuthKey(MachineIP):
+    # Give the container time to spawn, then send request to init key
+    time.sleep(1)
+    cleanKey = str(LimitInputChars(sys.argv[2]))
+    requests.post("http://" + str(MachineIP) + ":8855/initKey?key=" + str(cleanKey))
 
 # -== Endpoint functionality ==-
 
@@ -88,6 +90,13 @@ class SpawnMachine(Resource):
 
 # -== Endpoints ==-
 api.add_resource(SpawnMachine, "/spawnMachine")
+
+# -== SpawnMicroServices ==-
+authService = SpawnContainer("auth_service:latest")
+authServiceIP = GetContainerIP(authService)
+InitAuthKey(authServiceIP)
+datastoreService = SpawnContainer("datastore_service:latest")
+datastoreServiceIP = GetContainerIP(datastoreService)
 
 # -== Start server ==-
 # Validate input, if correct then start server

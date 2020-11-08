@@ -15,6 +15,7 @@ function GetHashedKey() {
 
 // Fill campaign options, based upon data from backend (async request)
 function FillCampaignInfo() {
+    // Make async request to get the data
     let httpReq = new XMLHttpRequest();
     httpReq.onreadystatechange = function() {
         // When we get a response, do this:
@@ -35,8 +36,12 @@ function FillCampaignInfo() {
 
 // Get campaign info, and show it on the document
 function GetCampaignInfo() {
+    // Remove old info with loading comment
+    document.getElementById("campaignInfo").innerHTML = `<p class="text-center text-light">Loading...</p>`
+    document.getElementById("spawnedCampaignInfo").innerHTML = ""
+
     // Get currently selected name
-    campaignName = document.getElementById("campaignSelect").value
+    const campaignName = document.getElementById("campaignSelect").value
     
     // Make async request to get the data
     let httpReq = new XMLHttpRequest();
@@ -46,8 +51,8 @@ function GetCampaignInfo() {
             const campaignInfo = JSON.parse(httpReq.response)
 
             // Add info to HTML, and HTML needed to spawn campaign
-            let infoHTML = `<h3 class="text-center">Campaign: ${campaignInfo["name"]}</h3><p class="text-center">${campaignInfo["description"]}</p>`
-            infoHTML += `<div class="form-group text-center"><input type="text" id="key" placeholder="Key"><button class="btn btn-secondary text-center" onclick="SpawnCampaign()">Spawn Campaign</button></div>`
+            let infoHTML = `<h3 class="text-center text-light">Campaign: ${campaignInfo["name"]}</h3><p class="text-center text-light">${campaignInfo["description"]}</p>`
+            infoHTML += `<div class="form-group text-center text-light"><input class="fillWidht" type="text" id="key" placeholder="Key"><button class="btn btn-dark fillWidht text-center text-light" onclick="SpawnCampaign()">Spawn Campaign</button></div>`
 
             // Write it to the document
             document.getElementById("campaignInfo").innerHTML = infoHTML
@@ -59,10 +64,13 @@ function GetCampaignInfo() {
 
 // Spawn the selected campaign, if the API key is correct
 function SpawnCampaign() {
+    // Remove old info with loading comment
+    document.getElementById("spawnedCampaignInfo").innerHTML = `<p class="text-center text-light">Loading...</p>`
+
     // Get currently selected name, and hashed key value
-    campaignName = document.getElementById("campaignSelect").value
-    plainKey = document.getElementById("key").value
-    hashedKey = GetHashedKey(plainKey)
+    const campaignName = document.getElementById("campaignSelect").value
+    const plainKey = document.getElementById("key").value
+    const hashedKey = GetHashedKey(plainKey)
     
     // Make async request to get spawn the campaign, and get data
     let httpReq = new XMLHttpRequest();
@@ -78,9 +86,9 @@ function SpawnCampaign() {
                 ids.push(spawnedInfo[i]["id"])
                 ips.push(spawnedInfo[i]["ip"])
             }
-            let infoHTML = `<b><h2 class="text-center">Spawned Machines:</h2></b><p class="text-center">Here is the list of spawned machines, which belong to your campaign.</p><table class="table"><thead><tr><th scope="col">Machine ID</th><th scope="col">Local IP</th></tr></thead><tbody>`
+            let infoHTML = `<b><h2 class="text-center text-light">Spawned Machines:</h2></b><p class="text-center text-light">Here is the list of spawned machines, which belong to your campaign.</p><table class="table"><thead><tr><th class="text-light" scope="col">Machine ID</th><th class="text-light" scope="col">Local IP</th></tr></thead><tbody>`
             for (i = 0; i < ids.length; i++) {
-                infoHTML += `<tr><td>${ids[i]}</td><td>${ips[i]}</td></tr>`
+                infoHTML += `<tr><td class="text-light">${ids[i]}</td><td class="text-light">${ips[i]}</td></tr>`
             }
             infoHTML += `</tbody></table>`
 

@@ -1,6 +1,21 @@
 body, html {
-    background: linear-gradient(-20deg, #6e45e2 0%, #88d3ce 100%) no-repeat center center fixed;
+    background: #0A1C25;
+    background: -webkit-linear-gradient(top left, #0A1C25, #591413) no-repeat center center fixed;
+    background: -moz-linear-gradient(top left, #0A1C25, #591413) no-repeat center center fixed;
+    background: linear-gradient(to bottom right, #0A1C25, #591413) no-repeat center center fixed;
     background-size: cover;
 }
 
-.contentBox { margin-top: 2rem; }
+.contentBox { margin-top: 2em; }
+
+#logo {
+    width: 100%;
+    max-width: 25vh;
+    margin-top: 1em;
+    margin-bottom: 1em;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
+
+.fillWidht { width: 100% }

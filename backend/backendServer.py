@@ -13,6 +13,7 @@ from app.vagrantController import SpawnVagrantMachine, GetMachineIP
 app = Flask(__name__)
 api = Api(app)
 CORS(app)
+app.config["CORS_HEADERS"] = "Content-Type"
 
 # -== Helper functions ==-
 
@@ -20,7 +21,7 @@ CORS(app)
 # Note: File has to be in ./templates folder
 def MakeResponse(fileLocation, mimeType):
     response = make_response(render_template(fileLocation))
-    response.headers['Content-Type'] = mimeType
+    response.headers["Content-Type"] = mimeType
     return response
 
 # Validate key, by making a request to the auth micro service

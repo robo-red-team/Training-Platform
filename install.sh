@@ -26,4 +26,4 @@ else
 fi
 
 # Docker build
-echo -e "\nPlase manually build the desired docker images\nYou can find them in ./machines/docker/*\nAnd in ./backend/microServices/*\n"
+bash buildDockers.sh

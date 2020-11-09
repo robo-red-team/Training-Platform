@@ -18,6 +18,11 @@
         "name": "2-attacker-ftplime",
         "type": "docker",
         "imageName": "2-attacker-ftplime:latest" 
+    },
+    {
+        "name": "1-attacker.notessqli",
+        "type": "docker",
+        "imageName": "1-attacker.notessqli:latest" 
     }
     
 ]

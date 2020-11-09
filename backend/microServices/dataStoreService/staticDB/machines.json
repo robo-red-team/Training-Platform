@@ -8,5 +8,16 @@
         "name": "dockerTester",
         "type": "docker",
         "imageName": "docker_tester:latest" 
+    },
+    {
+        "name": "1-defender-notessqli",
+        "type": "docker",
+        "imageName": "1-defender-notessqli:latest" 
+    },
+    {
+        "name": "2-attacker-ftplime",
+        "type": "docker",
+        "imageName": "2-attacker-ftplime:latest" 
     }
+    
 ]

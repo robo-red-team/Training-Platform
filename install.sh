@@ -6,10 +6,16 @@ packages="python vagrant"
 pythonDependencies="flask flask_restful flask_cors docker python-vagrant"
 systemctlStart="docker" 
 
+# Build all docker instances
+BuildDocker() {
+    bash buildDockers.sh
+}
+
 # Common things for pacman- and apt based systems
 CommonSetup() {
     systemctl enable $systemctlStart
     systemctl start $systemctlStart
+    BuildDocker
 }
 
 # Installation of needed packages
@@ -23,8 +29,6 @@ elif [ "$1" == "apt" ]; then
     pip3 install $pythonDependencies
     CommonSetup
 else
-    echo -e "Please manually install: $packages [docker/docker.io] [pip for python3]\nand these Python libaries: $pythonDependencies\nOr run the script with 'pacman' or 'apt' as param."
+    BuildDocker
+    echo -e "\n======================\n---Manually install---\n======================\nPlease manually install: $packages [docker/docker.io] [pip for python3]\nand these Python libaries: $pythonDependencies\nOr run the script with 'pacman' or 'apt' as param.\n"
 fi
-
-# Docker build
-bash buildDockers.sh

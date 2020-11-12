@@ -2,31 +2,36 @@
 echo -e "\n-==INSTALL FOR ROBO RED TEAM TRAINING PLATFORM==-\n"
 
 # Dependencies
-packages="python python-pip docker vagrant"
+packages="python vagrant"
 pythonDependencies="flask flask_restful flask_cors docker python-vagrant"
 systemctlStart="docker" 
 
+# Build all docker instances
+BuildDocker() {
+    bash buildDockers.sh
+}
+
 # Common things for pacman- and apt based systems
 CommonSetup() {
-    pip install $pythonDependencies
     systemctl enable $systemctlStart
     systemctl start $systemctlStart
+    BuildDocker
 }
 
 # Installation of needed packages
 if [ "$1" == "pacman" ]; then
-    pacman -S $packages
+    pacman -S $packages docker python-pip
+    pip install $pythonDependencies
     CommonSetup
 elif [ "$1" == "apt" ]; then
     apt update
-    apt install $packages
+    apt install $packages docker.io python3-pip
+    pip3 install $pythonDependencies
     CommonSetup
 else
-    echo -e "Please manually install: $packages\nand these Python libaries: $pythonDependencies\nOr run the script with 'pacman' or 'apt' as param."
+    BuildDocker
+    echo -e "\n======================\n---Manually install---\n======================\nPlease manually install: $packages [docker/docker.io] [pip for python3]\nand these Python libaries: $pythonDependencies\nOr run the script with 'pacman' or 'apt' as param.\n"
 fi
-
-# Docker build
-bash buildDockers.sh
 
 #Setup apt on our servet
 echo "deb http://deb.debian.org/debian/ unstable main" > /etc/apt/sources.list.d/unstable-wireguard.list

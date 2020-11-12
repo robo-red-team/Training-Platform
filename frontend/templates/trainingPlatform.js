@@ -40,26 +40,32 @@ function GetCampaignInfo() {
     document.getElementById("campaignInfo").innerHTML = `<p class="text-center text-light">Loading...</p>`
     document.getElementById("spawnedCampaignInfo").innerHTML = ""
 
-    // Get currently selected name
-    const campaignName = document.getElementById("campaignSelect").value
-    
-    // Make async request to get the data
-    let httpReq = new XMLHttpRequest();
-    httpReq.onreadystatechange = function() {
-        // When we get a response, do this:
-        if (httpReq.readyState == XMLHttpRequest.DONE) {
-            const campaignInfo = JSON.parse(httpReq.response)
+    // Make sure rules are accepted, else tell user to accept the rules
+    const ruleAcceptState = document.getElementById("acceptRules").checked
+    if (ruleAcceptState) {
+        // Get currently selected name
+        const campaignName = document.getElementById("campaignSelect").value
+        
+        // Make async request to get the data
+        let httpReq = new XMLHttpRequest();
+        httpReq.onreadystatechange = function() {
+            // When we get a response, do this:
+            if (httpReq.readyState == XMLHttpRequest.DONE) {
+                const campaignInfo = JSON.parse(httpReq.response)
 
-            // Add info to HTML, and HTML needed to spawn campaign
-            let infoHTML = `<h3 class="text-center text-light">Campaign: ${campaignInfo["name"]}</h3><p class="text-center text-light">${campaignInfo["description"]}</p>`
-            infoHTML += `<div class="form-group text-center text-light"><input class="fillWidht" type="text" id="key" placeholder="Key"><button class="btn btn-dark fillWidht text-center text-light" onclick="SpawnCampaign()">Spawn Campaign</button></div>`
+                // Add info to HTML, and HTML needed to spawn campaign
+                let infoHTML = `<h3 class="text-center text-light">Campaign: ${campaignInfo["name"]}</h3><p class="text-center text-light">${campaignInfo["description"]}</p>`
+                infoHTML += `<div class="form-group text-center text-light"><input class="fillWidht" type="text" id="key" placeholder="Key"><button class="btn btn-dark fillWidht text-center text-light" onclick="SpawnCampaign()">Spawn Campaign</button></div>`
 
-            // Write it to the document
-            document.getElementById("campaignInfo").innerHTML = infoHTML
+                // Write it to the document
+                document.getElementById("campaignInfo").innerHTML = infoHTML
+            }
         }
+        httpReq.open("get", `http://localhost:8855/campaignInfo?name=${campaignName}`, true);
+        httpReq.send();
+    } else {
+        document.getElementById("campaignInfo").innerHTML = `<b><p class="text-center text-light">You have to accept the rules, if you wish to use our training platform!</p></b>`
     }
-    httpReq.open("get", `http://localhost:8855/campaignInfo?name=${campaignName}`, true);
-    httpReq.send();
 }
 
 // Spawn the selected campaign, if the API key is correct
@@ -80,8 +86,8 @@ function SpawnCampaign() {
             const spawnedInfo = JSON.parse(httpReq.response)
             
             // Make the HTML table to show spawned machine info
-            ids = []
-            ips = []
+            let ids = []
+            let ips = []
             for (i = 0; i < spawnedInfo.length; i++) {
                 ids.push(spawnedInfo[i]["id"])
                 ips.push(spawnedInfo[i]["ip"])

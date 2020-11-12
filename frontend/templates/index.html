@@ -25,9 +25,26 @@
                         </div>
                     </div>
                 </div>
+                <div>
+                    <div class="row justify-content-center">
+                        <div class="col-6">
+                            <div class="fillWidth">
+                                <h3 class="text-center text-light">Rules:</h3>
+                                <ul class="list">
+                                    <li class="text-light">You are only allowed to access the systems for which we give you the credentials.</li>
+                                    <li class="text-light">You are not allowed to attack any systems.</li>
+                                    <li class="text-light">You are not allowed to block ingoing traffic to the machines you defend, as this is not a "real-life" solution and will therefore hurt your learning experience.</li>
+                                    <li class="text-light">If you break these rules, remember you are liable for any actions you make.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="row justify-content-center">
                     <div class="col-6">
                         <div class="form-group text-center">
+                            <input type="checkbox" id="acceptRules">
+                            <label for="acceptRules" class="text-light">I accept the rules</label>
                             <select class="fillWidht form-control" id="campaignSelect"></select>
                             <button class="fillWidht btn btn-dark text-center" onclick="GetCampaignInfo()">Get Campaign Info</button>
                         </div>

@@ -30,7 +30,7 @@ function FillCampaignInfo() {
             document.getElementById("campaignSelect").innerHTML = optionsHTML
         }
     }
-    httpReq.open("get", `http://localhost:8855/campaignNames`, true);
+    httpReq.open("get", `http://${window.location.hostname}:8855/campaignNames`, true);
     httpReq.send();  
 }
 
@@ -61,7 +61,7 @@ function GetCampaignInfo() {
                 document.getElementById("campaignInfo").innerHTML = infoHTML
             }
         }
-        httpReq.open("get", `http://localhost:8855/campaignInfo?name=${campaignName}`, true);
+        httpReq.open("get", `http://${window.location.hostname}:8855/campaignInfo?name=${campaignName}`, true);
         httpReq.send();
     } else {
         document.getElementById("campaignInfo").innerHTML = `<b><p class="text-center text-light">You have to accept the rules, if you wish to use our training platform!</p></b>`
@@ -102,7 +102,7 @@ function SpawnCampaign() {
             document.getElementById("spawnedCampaignInfo").innerHTML = infoHTML
         }
     }
-    httpReq.open("post", `http://localhost:8855/campaignSpawn?name=${campaignName}&key=${hashedKey}`, true);
+    httpReq.open("post", `http://${window.location.hostname}:8855/campaignSpawn?name=${campaignName}&key=${hashedKey}`, true);
     httpReq.send();
 }
 

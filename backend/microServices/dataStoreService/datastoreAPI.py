@@ -10,7 +10,7 @@ api = Api(app)
 
 # Function used to return a Json object in a file
 def GetJsonObjFromFile(FileName, Name):
-    cleanName = str(re.sub("[^0-9a-zA-Z]", "", str(Name)))
+    cleanName = str(re.sub("[^0-9a-zA-Z-]", "", str(Name)))
     # Open file as JSON
     dbFile = open(FileName)
     allObjects = json.load(dbFile)

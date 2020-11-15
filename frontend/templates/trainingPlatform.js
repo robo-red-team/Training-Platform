@@ -55,7 +55,7 @@ function GetCampaignInfo() {
 
                 // Add info to HTML, and HTML needed to spawn campaign
                 let infoHTML = `<h3 class="text-center text-light">Campaign: ${campaignInfo["name"]}</h3><p class="text-center text-light">${campaignInfo["description"]}</p>`
-                infoHTML += `<div class="form-group text-center text-light"><input class="fillWidht" type="text" id="key" placeholder="Key"><button class="btn btn-dark fillWidht text-center text-light" onclick="SpawnCampaign()">Spawn Campaign</button></div>`
+                infoHTML += `<div class="form-group text-center text-light"><select class="form-control" id="timeWaitMin"><option vlaue="15">15 minutes before attack</option><option vlaue="30">30 minutes before attack</option><option vlaue="45">45 minutes before attack</option><option vlaue="60">60 minutes before attack</option></select><input class="fillWidht" type="text" id="key" placeholder="Key"><button class="btn btn-dark fillWidht text-center text-light" onclick="SpawnCampaign()">Spawn Campaign</button></div>`
 
                 // Write it to the document
                 document.getElementById("campaignInfo").innerHTML = infoHTML
@@ -73,8 +73,9 @@ function SpawnCampaign() {
     // Remove old info with loading comment
     document.getElementById("spawnedCampaignInfo").innerHTML = `<p class="text-center text-light">Loading...</p>`
 
-    // Get currently selected name, and hashed key value
+    // Get currently selected name, wait time, and hashed key value
     const campaignName = document.getElementById("campaignSelect").value
+    const waitTimeMin = document.getElementById("timeWaitMin").value
     const plainKey = document.getElementById("key").value
     const hashedKey = GetHashedKey(plainKey)
     
@@ -102,7 +103,7 @@ function SpawnCampaign() {
             document.getElementById("spawnedCampaignInfo").innerHTML = infoHTML
         }
     }
-    httpReq.open("post", `http://${window.location.hostname}:8855/campaignSpawn?name=${campaignName}&key=${hashedKey}`, true);
+    httpReq.open("post", `http://${window.location.hostname}:8855/campaignSpawn?name=${campaignName}&key=${hashedKey}&waitTimeMin=${waitTimeMin}`, true);
     httpReq.send();
 }
 

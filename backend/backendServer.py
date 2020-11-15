@@ -65,7 +65,7 @@ def SpawnMachine(MachineName):
     elif str(machineInfo["type"]) == "vagrant":
         spawned = SpawnVagrantMachine(machineInfo["pathFromRoot"])
         if spawned == True:
-            return {"id": str(machineInfo["name"]), "ip": str(GetMachineIP(str(machineInfo["pathFromRoot"])))}
+            return {"id": str(machineInfo["name"]), "ip": str(GetMachineIP(str(machineInfo["pathFromRoot"]))), "attacker": machineInfo["attacker"], "shortDescription": machineInfo["shortDescription"]}
         else:
             return False
     # If it is a Docker machine
@@ -73,7 +73,7 @@ def SpawnMachine(MachineName):
         try:
             spawnID = SpawnContainer(str(machineInfo["imageName"]))
             spawnIP = GetContainerIP(spawnID)
-            return {"id": str(spawnID), "ip": str(spawnIP)}
+            return {"id": str(spawnID), "ip": str(spawnIP), "category": machineInfo["category"], "shortDescription": machineInfo["shortDescription"]}
         except:
             return False
 
@@ -85,18 +85,31 @@ class SpawnCampaign(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument("key")
         parser.add_argument("name")
+        parser.add_argument("waitTimeMin")
         args = parser.parse_args()
 
         # Make sure API key is correct
         if ValidateKey(str(LimitInputChars(args["key"]))):
+            # Spawn a campaign manager
+            manager = SpawnContainer("campaign-maneger_service")
+            managerIP = GetContainerIP(manager)
+
             campaignInfo = GetJSONDataFromAPI("http://" + datastoreServiceIP + ":8855/campaignInfo?name=" + str(LimitInputChars(args["name"])))
             # Spawn machines, and store data in list
             spawnInfo = []
             for machine in campaignInfo["machines"]:
                 spawnInfo.append(SpawnMachine(machine))
-            return spawnInfo
+            
+
+            payload = {"waitTimeMin": LimitInputChars(args["waitTimeMin"]), "machineInfo": spawnInfo}
+            req = requests.post("http://" + managerIP + ":8855/init", params=payload)
+
+            return req.text
         else:
             return "Invalid key"
+
+# TODO add destruction of a campaign
+
 
 # Send names of all campaigns
 class CampaignNames(Resource):

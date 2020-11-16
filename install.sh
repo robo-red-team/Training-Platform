@@ -6,6 +6,7 @@ packages="python vagrant"
 pythonDependencies="flask flask_restful flask_cors docker python-vagrant"
 systemctlStart="docker" 
 
+
 # Build all docker instances
 BuildDocker() {
     bash buildDockers.sh
@@ -23,13 +24,15 @@ if [ "$1" == "pacman" ]; then
     pacman -S $packages docker python-pip
     pip install $pythonDependencies
     CommonSetup
+    echo -e "\nRemember to install WireGuard\n"
 elif [ "$1" == "apt" ]; then
     apt update
     apt install $packages docker.io python3-pip
     pip3 install $pythonDependencies
     CommonSetup
+    systemctl enable "wg-quick@wg0"
     bash wireGuard.sh
 else
     BuildDocker
-    echo -e "\n======================\n---Manually install---\n======================\nPlease manually install: $packages [docker/docker.io] [pip for python3]\nand these Python libaries: $pythonDependencies\nOr run the script with 'pacman' or 'apt' as param.\n"
+    echo -e "\n======================\n---Manually install---\n======================\nPlease manually install: $packages WireGuard [docker/docker.io] [pip for python3]\nand these Python libaries: $pythonDependencies\nOr run the script with 'pacman' or 'apt' as param.\n"
 fi

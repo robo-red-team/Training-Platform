@@ -39,5 +39,4 @@ AllowedIPs = 10.0.0.$(($i+1))/32, 10.0.0.$(($i+1))/24 # Internal IP address of t
 " >> /etc/wireguard/wg0.conf
 done
 
-systemctl enable wg-quick@wg0
-systemctl start wg-quick@wg0
+systemctl restart wg-quick@wg0

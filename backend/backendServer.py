@@ -50,7 +50,7 @@ def GetJSONDataFromAPI(UrlWithParams):
 # Initialize key in Auth Service
 def InitAuthKey(MachineIP):
     # Give the container time to spawn, then send request to init key
-    time.sleep(1)
+    time.sleep(5)
     cleanKey = str(LimitInputChars(sys.argv[2]))
     requests.post("http://" + str(MachineIP) + ":8855/initKey?key=" + str(cleanKey))
 

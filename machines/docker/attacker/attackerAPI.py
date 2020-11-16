@@ -28,7 +28,7 @@ class Start(Resource):
             parser.add_argument("attackType")
             args = parser.parse_args()
             apiKey = LimitInputChars(args["key"])
-            os.system("echo './exploit.sh" + str(args["ipToUse"]) + " " + str(args["waitTime"]) + "'")
+            os.system("cd " + str(args["attackType"]) + "; echo './exploit.sh" + str(args["ipToUse"]) + " " + str(args["waitTime"]) + "' ")
             return "Started script"
         else:
             return "ERROR, machine already started!"

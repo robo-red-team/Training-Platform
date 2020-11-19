@@ -73,14 +73,13 @@ function SpawnCampaign() {
     // Remove old info with loading comment
     document.getElementById("spawnedCampaignInfo").innerHTML = `<p class="text-center text-light">Loading...</p>`
 
-    // Get currently selected name, wait time, and hashed key value
+    // Get currently selected name, and hashed key value
     const campaignName = document.getElementById("campaignSelect").value
-    let waitTimeMin = document.getElementById("timeWaitMin").selectedIndex
     const plainKey = document.getElementById("key").value
     const hashedKey = GetHashedKey(plainKey)
 
     // Set waitTimeMin value, based on selected option
-    console.log(waitTimeMin)
+    let waitTimeMin = document.getElementById("timeWaitMin").selectedIndex
     switch(waitTimeMin) {
         case 0:
             waitTimeMin = 15
@@ -95,7 +94,6 @@ function SpawnCampaign() {
             waitTimeMin = 60
             break
     }
-    console.log(waitTimeMin)
     
     // Make async request to get spawn the campaign, and get data
     let httpReq = new XMLHttpRequest();

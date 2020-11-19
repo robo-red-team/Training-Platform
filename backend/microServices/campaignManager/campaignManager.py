@@ -14,6 +14,20 @@ api = Api(app)
 def LimitInputChars(string):
     return str(re.sub("[^0-9a-zA-Z-=]", "", str(string)))
 
+# Send required info to attacker machine, in order to start the attack
+def StartAttacker(waitTimeMin):
+    global machines
+    allMachines = list(str(machines))
+    attackerIP = ""
+
+    return len(allMachines)
+
+    # Get IP of attacker
+    for i in list(machines):
+        return
+
+    return attackerIP
+
 # -== Params ==-
 apiKey = LimitInputChars(uuid.uuid4)
 port = 8855
@@ -30,8 +44,14 @@ class Init(Resource):
         # Decode the machine info from base64
         machineInfoBytes = LimitInputChars(args["machineInfo"]).encode("ascii")
         decodedMachineInfo = base64.b64decode(machineInfoBytes).decode("ascii")
+        global machines
+        machines = json.dumps('"' + str(decodedMachineInfo) + '"')[0]
 
-        return decodedMachineInfo
+        # Start the attacker machine
+        return machines[0]
+        return StartAttacker(int(args["waitTimeMin"]))
+
+        return machines
 
 # -== Endpoints ==-
 api.add_resource(Init, "/init")

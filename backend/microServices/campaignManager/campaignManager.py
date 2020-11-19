@@ -1,7 +1,6 @@
 import re
-import uuid
 import json
-import base64
+import requests
 from flask import Flask
 from flask_restful import Resource, Api, reqparse
 
@@ -12,49 +11,71 @@ api = Api(app)
 
 # Limit the amount of valid input chars, to increase security
 def LimitInputChars(string):
-    return str(re.sub("[^0-9a-zA-Z-=]", "", str(string)))
+    return str(re.sub("[^0-9a-zA-Z-=',:.! ]", "", str(string)))
 
-# Send required info to attacker machine, in order to start the attack
-def StartAttacker(waitTimeMin):
+# Get the IP(s) of machines within a category, as list
+def GetCategoryIPs(category):
     global machines
-    allMachines = list(str(machines))
-    attackerIP = ""
+    attackers = []
 
-    return len(allMachines)
-
-    # Get IP of attacker
-    for i in list(machines):
-        return
-
-    return attackerIP
+    # Find all of category, and get their IP
+    for machine in machines:
+        if machine["category"] == str(category):
+            attackers.append(machine["ip"])
+    return attackers
 
 # -== Params ==-
-apiKey = LimitInputChars(uuid.uuid4)
 port = 8855
-machines = None
+machines = []
+started = False
 
 # -== Endpoint functionality ==-
-class Init(Resource):
+
+# Each call will add a machine to the machines, list
+class AddMachine(Resource):
     def post(self):
         parser = reqparse.RequestParser()
-        parser.add_argument("machineInfo")
-        parser.add_argument("waitTimeMin")
+        parser.add_argument("id")
+        parser.add_argument("ip")
+        parser.add_argument("category")
         args = parser.parse_args()
 
-        # Decode the machine info from base64
-        machineInfoBytes = LimitInputChars(args["machineInfo"]).encode("ascii")
-        decodedMachineInfo = base64.b64decode(machineInfoBytes).decode("ascii")
+        # Store data in dict
+        machineInfo = {
+            "id": LimitInputChars(args["id"]),
+            "ip": LimitInputChars(args["ip"]),
+            "category": LimitInputChars(args["category"])
+        }
+        
+        # Add machineInfo to list
         global machines
-        machines = json.dumps('"' + str(decodedMachineInfo) + '"')[0]
+        machines.append(machineInfo)
+        return "Machine Added"
 
-        # Start the attacker machine
-        return machines[0]
-        return StartAttacker(int(args["waitTimeMin"]))
+# Called to start the campagign
+class Start(Resource):
+    def post(self):
+        global started
+        if not started:
+            started = True
+            parser = reqparse.RequestParser()
+            parser.add_argument("waitTimeMin")
+            args = parser.parse_args()
 
-        return machines
+            # Get attacker IP(s) and send start request to attacker
+            attackerIPs = GetCategoryIPs("attacker")
+            defenderIPs = GetCategoryIPs("defender")
+            #for attackerIP in attackerIPs:
+                #requests.post("http://" + str(attackerIP) + "/start")
+                # TODO: Add the needed params for the attacker to start
+
+            return "Started"
+        else:
+            return "ERROR: Campaign already started"
 
 # -== Endpoints ==-
-api.add_resource(Init, "/init")
+api.add_resource(AddMachine, "/addMachine")
+api.add_resource(Start, "/start")
 
 # -== Start server ==-
 # Validate input, if correct then start server

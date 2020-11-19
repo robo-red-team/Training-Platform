@@ -37,7 +37,7 @@
     {
         "name": "campaign-manager",
         "type": "docker",
-        "imageName": "campaign-maneger_service:latest",
+        "imageName": "campaign-manager_service:latest",
         "category": "infrastructure",
         "shortDescription": "!!! TO BE DESCRIBED !!!"
     }

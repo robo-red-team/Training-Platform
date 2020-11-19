@@ -105,13 +105,15 @@ function SpawnCampaign() {
             // Make the HTML table to show spawned machine info
             let ids = []
             let ips = []
+            let descriptions = []
             for (i = 0; i < spawnedInfo.length; i++) {
                 ids.push(spawnedInfo[i]["id"])
                 ips.push(spawnedInfo[i]["ip"])
+                descriptions.push(spawnedInfo[i]["shortDescription"])
             }
-            let infoHTML = `<b><h2 class="text-center text-light">Spawned Machines:</h2></b><p class="text-center text-light">Here is the list of spawned machines, which belong to your campaign.</p><table class="table"><thead><tr><th class="text-light" scope="col">Machine ID</th><th class="text-light" scope="col">Local IP</th></tr></thead><tbody>`
+            let infoHTML = `<b><h2 class="text-center text-light">Spawned Machines:</h2></b><p class="text-center text-light">Here is the list of spawned machines, which belong to your campaign.</p><table class="table"><thead><tr><th class="text-light" scope="col">Machine ID</th><th class="text-light" scope="col">Local IP</th><th class="text-light" scope="col">Short description</th></tr></thead><tbody>`
             for (i = 0; i < ids.length; i++) {
-                infoHTML += `<tr><td class="text-light">${ids[i]}</td><td class="text-light">${ips[i]}</td></tr>`
+                infoHTML += `<tr><td class="text-light">${ids[i]}</td><td class="text-light">${ips[i]}</td><td class="text-light">${descriptions[i]}</td></tr>`
             }
             infoHTML += `</tbody></table>`
 

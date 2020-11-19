@@ -1,2 +1,2 @@
 #!/bin/bash
-docker build -t campaign-maneger_service .
+docker build -t campaign-manager_service .

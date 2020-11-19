@@ -1,6 +1,6 @@
 #From mathias kali image
 FROM kalilinux/kali-rolling:latest
-RUN apt update && apt upgrade -y
+RUN apt update
 RUN apt-get -y install nmap python3 python3-pip
 WORKDIR /working
 RUN pip3 install flask flask_restful

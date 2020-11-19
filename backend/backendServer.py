@@ -16,6 +16,9 @@ api = Api(app)
 CORS(app)
 app.config["CORS_HEADERS"] = "Content-Type"
 
+# -== Params ==-
+waitTimeForContainerSpawn = 3
+
 # -== Helper functions ==-
 
 # Function to return file and mime-type, as a Flask response
@@ -51,7 +54,7 @@ def GetJSONDataFromAPI(UrlWithParams):
 # Initialize key in Auth Service
 def InitAuthKey(MachineIP):
     # Give the container time to spawn, then send request to init key
-    time.sleep(5)
+    time.sleep(waitTimeForContainerSpawn)
     cleanKey = str(LimitInputChars(sys.argv[2]))
     requests.post("http://" + str(MachineIP) + ":8855/initKey?key=" + str(cleanKey))
 
@@ -78,6 +81,10 @@ def SpawnMachine(MachineName):
         except:
             return False
 
+# Base64 encode a string
+def Base64EncodeString(text):
+    return base64.b64encode(str(text).encode("ascii")).decode("ascii")
+
 # -== Endpoint functionality ==-
 
 # Spawn a campaign if API key is correct
@@ -91,28 +98,35 @@ class SpawnCampaign(Resource):
 
         # Make sure API key is correct
         if ValidateKey(str(LimitInputChars(args["key"]))):
-            # Spawn a campaign manager
-            manager = SpawnContainer("campaign-maneger_service")
+            # Fetch data from datastore
+            campaignInfo = GetJSONDataFromAPI("http://" + str(datastoreServiceIP) + ":8855/campaignInfo?name=" + str(LimitInputChars(args["name"])))
+            
+            # Spawn a campaign manager, and wait for it to be done
+            manager = SpawnContainer("campaign-manager_service:latest")
             managerIP = GetContainerIP(manager)
-
-            campaignInfo = GetJSONDataFromAPI("http://" + datastoreServiceIP + ":8855/campaignInfo?name=" + str(LimitInputChars(args["name"])))
-            # Spawn machines, and store data in list
+            time.sleep(waitTimeForContainerSpawn)
+            
+            # Spawn machines, store data in list, and send info to campaign manager
             spawnInfo = []
             for machine in campaignInfo["machines"]:
-                spawnInfo.append(SpawnMachine(machine))
+                machineInfo = SpawnMachine(machine)
+                spawnInfo.append(machineInfo)
+                requests.post("http://" + str(managerIP) + ":8855/addMachine?id=" + LimitInputChars(machineInfo["id"]) + "&ip=" + LimitInputChars(machineInfo["ip"]) + "&category=" + LimitInputChars(machineInfo["category"]))
 
-            # Base64 encode object, to be able to send
-            spawnInfoBase64 = base64.b64encode(str(spawnInfo).encode("ascii")).decode("ascii")
-            return spawnInfoBase64
-            payload = {"waitTimeMin": LimitInputChars(args["waitTimeMin"]), "machineInfo": spawnInfoBase64}
-            req = requests.post("http://" + managerIP + ":8855/init", params=payload)
+            # Ensure service have time to add all data
+            time.sleep(int(waitTimeForContainerSpawn / 2))
 
-            return req.text
+            # Start the campaign
+            req = requests.post("http://" + str(managerIP) + ":8855/start?waitTimeMin=" + LimitInputChars(args["waitTimeMin"]))
+            
+            # Return info of all spawned machines, to be displayed on the front-end 
+            return spawnInfo
         else:
             return "Invalid key"
 
-# TODO add destruction of a campaign
+# TODO add destruction of campaign machines
 
+# TODO add status updates for a campaign
 
 # Send names of all campaigns
 class CampaignNames(Resource):

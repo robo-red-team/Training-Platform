@@ -1,6 +1,7 @@
 import re
 import uuid
 import json
+import base64
 from flask import Flask
 from flask_restful import Resource, Api, reqparse
 
@@ -11,7 +12,7 @@ api = Api(app)
 
 # Limit the amount of valid input chars, to increase security
 def LimitInputChars(string):
-    return str(re.sub("[^0-9a-zA-Z-]", "", str(string)))
+    return str(re.sub("[^0-9a-zA-Z-=]", "", str(string)))
 
 # -== Params ==-
 apiKey = LimitInputChars(uuid.uuid4)
@@ -25,7 +26,12 @@ class Init(Resource):
         parser.add_argument("machineInfo")
         parser.add_argument("waitTimeMin")
         args = parser.parse_args()
-        return "hello " + str(args["machineInfo"])
+
+        # Decode the machine info from base64
+        machineInfoBytes = LimitInputChars(args["machineInfo"]).encode("ascii")
+        decodedMachineInfo = base64.b64decode(machineInfoBytes).decode("ascii")
+
+        return decodedMachineInfo
 
 # -== Endpoints ==-
 api.add_resource(Init, "/init")

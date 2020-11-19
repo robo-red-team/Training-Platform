@@ -4,6 +4,7 @@ import re
 import json
 import urllib
 import time
+import base64
 from flask import Flask, make_response, render_template, request
 from flask_restful import Resource, Api, reqparse
 from flask_cors import CORS
@@ -50,7 +51,7 @@ def GetJSONDataFromAPI(UrlWithParams):
 # Initialize key in Auth Service
 def InitAuthKey(MachineIP):
     # Give the container time to spawn, then send request to init key
-    time.sleep(1)
+    time.sleep(5)
     cleanKey = str(LimitInputChars(sys.argv[2]))
     requests.post("http://" + str(MachineIP) + ":8855/initKey?key=" + str(cleanKey))
 
@@ -99,9 +100,11 @@ class SpawnCampaign(Resource):
             spawnInfo = []
             for machine in campaignInfo["machines"]:
                 spawnInfo.append(SpawnMachine(machine))
-            
 
-            payload = {"waitTimeMin": LimitInputChars(args["waitTimeMin"]), "machineInfo": spawnInfo}
+            # Base64 encode object, to be able to send
+            spawnInfoBase64 = base64.b64encode(str(spawnInfo).encode("ascii")).decode("ascii")
+            return spawnInfoBase64
+            payload = {"waitTimeMin": LimitInputChars(args["waitTimeMin"]), "machineInfo": spawnInfoBase64}
             req = requests.post("http://" + managerIP + ":8855/init", params=payload)
 
             return req.text

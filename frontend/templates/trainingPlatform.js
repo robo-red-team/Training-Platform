@@ -75,9 +75,27 @@ function SpawnCampaign() {
 
     // Get currently selected name, wait time, and hashed key value
     const campaignName = document.getElementById("campaignSelect").value
-    const waitTimeMin = document.getElementById("timeWaitMin").value
+    let waitTimeMin = document.getElementById("timeWaitMin").selectedIndex
     const plainKey = document.getElementById("key").value
     const hashedKey = GetHashedKey(plainKey)
+
+    // Set waitTimeMin value, based on selected option
+    console.log(waitTimeMin)
+    switch(waitTimeMin) {
+        case 0:
+            waitTimeMin = 15
+            break
+        case 1:
+            waitTimeMin = 30
+            break
+        case 2: 
+            waitTimeMin = 45
+            break
+        case 3:
+            waitTimeMin = 60
+            break
+    }
+    console.log(waitTimeMin)
     
     // Make async request to get spawn the campaign, and get data
     let httpReq = new XMLHttpRequest();

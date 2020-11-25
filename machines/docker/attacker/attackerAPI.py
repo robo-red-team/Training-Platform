@@ -1,11 +1,14 @@
 import re
 import os
-from flask import Flask
+from flask import Flask, jsonify,request
 from flask_restful import Resource, Api, reqparse
+from subprocess import Popen
 
 app = Flask(__name__)
 api = Api(app)
 
+# -== stored variables ==-
+campaignResult = None
 # -== Helper functions ==-
 
 # Limit the amount of valid input chars, to increase security
@@ -21,6 +24,7 @@ class Start(Resource):
     def post(self):
         global apiKey
         if apiKey == "":
+            own_ip  = os.popen('ip addr show eth0 | grep "\<inet\>" | awk \'{ print $2 }\' | awk -F "/" \'{ print $1 }\'').read().strip()
             parser = reqparse.RequestParser()
             parser.add_argument("key")
             parser.add_argument("ipToUse")
@@ -28,13 +32,28 @@ class Start(Resource):
             parser.add_argument("attackType")
             args = parser.parse_args()
             apiKey = LimitInputChars(args["key"])
-            os.system("cd " + str(args["attackType"]) + "; echo './exploit.sh" + str(args["ipToUse"]) + " " + str(args["waitTime"]) + "' ")
+            Popen("cd " + str(args["attackType"]) + "; echo './exploit.sh " + str(args["ipToUse"]) + " " + own_ip+ " " + str(args["waitTime"]) + "' ")
             return "Started script"
         else:
             return "ERROR, machine already started!"
 
+
+#Post to the campaign manager how the attack went.
+class Info(Resource):
+    def post(self):
+        json_data = request.get_json(force=True)
+        global campaignResult
+        campaignResult =  json_data
+        return "posted data."
+
+    def get(self):
+        global campaignResult
+        return campaignResult
+
+
 # -== Endpoints ==-
 api.add_resource(Start, "/start")
+api.add_resource(Info, "/info")
 
 # -== Start server ==-
 # Validate input, if correct then start server

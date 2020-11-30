@@ -8,5 +8,10 @@
         "name": "Test2",
         "machines": ["dockerTester", "defaultUbuntu"],
         "description": "A tester campaign which spawns both machines."
+    },
+    {
+        "name": "Actualcampaign",
+        "machines": ["1-defender-notessqli", "1-attacker-notessqli"],
+        "description": "Actualcampaign"
     }
 ]

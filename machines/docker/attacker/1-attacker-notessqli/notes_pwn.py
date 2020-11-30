@@ -85,27 +85,35 @@ if("password" in r.text):
 
 
 
-toPost = {
-    "bypass-login": [
-        {"login bypass possible":bypassable},
-        {"description":"True if sqli allows bypassing login}"},
-        {"Score":20}
-    ],
-    "inject-id": [
-        {"Injection in id field":idinjectable},
-        {"description":"True if you can still inject sql in the id field."},
-        {"Score":10}
-    ],
-    "import-any-note": [
-        {"Importing any other note is possible":importinjectable},
-        {"description":"True if you could still do sqli in the note import field."},
-        {"Score":30}
-    ],
-    "password-grab": [
-        {"sqli to grab any users password":passwordgrabbable},
-        {"description":"True if an attacker can import a note that contains another users password"},
-        {"Score":50}
+toPost= {
+    "attackName": "notessqli",
+    "checks": [
+        {
+            "name": "bypass login",
+            "description": "True if sqli allows bypassing login",
+            "patched": bypassable,
+            "score": 20
+        },
+        {
+            "name": "Inject in ID",
+            "description": "True if you can still inject sql in the id field.",
+            "patched": idinjectable,
+            "score": 10
+        },
+        {
+            "name": "Import any note",
+            "description": "True if you could still do sqli in the note import field.",
+            "patched": importinjectable,
+            "score": 30
+        },
+        {
+            "name": "Password grabbable",
+            "description": "True if an attacker can import a note that contains another users password",
+            "patched": passwordgrabbable,
+            "score": 50
+        }
     ]
 }
+
 requests.post("http://"+manager_ip+":8855/info",json=toPost)
 

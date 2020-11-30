@@ -18,7 +18,7 @@
         "type": "docker",
         "imageName": "1-defender-notessqli:latest",
         "category": "defender",
-        "shortDescription": "!!! TO BE DESCRIBED !!!" 
+        "shortDescription": "Sql injectable flask site" 
     },
     {
         "name": "2-attacker-ftplime",
@@ -32,7 +32,7 @@
         "type": "docker",
         "imageName": "1-attacker-notessqli:latest",
         "category": "attacker",
-        "shortDescription": "!!! TO BE DESCRIBED !!!" 
+        "shortDescription": "The attacker machine for the notes sqli" 
     },
     {
         "name": "campaign-manager",

@@ -16,23 +16,23 @@ def LimitInputChars(string):
     return str(re.sub("[^0-9a-zA-Z-]", "", str(string)))
 
 # -== Params ==-
-apiKey = ""
+started = False
 port = 8855
 
 # -== Endpoint functionality ==-
 class Start(Resource):
     def post(self):
-        global apiKey
-        if apiKey == "":
+        global started
+        if not apiKey:
             own_ip  = os.popen('ip addr show eth0 | grep "\<inet\>" | awk \'{ print $2 }\' | awk -F "/" \'{ print $1 }\'').read().strip()
             parser = reqparse.RequestParser()
-            parser.add_argument("key")
             parser.add_argument("ipToUse")
             parser.add_argument("waitTime")
             parser.add_argument("attackType")
             args = parser.parse_args()
             apiKey = LimitInputChars(args["key"])
-            Popen("cd " + str(args["attackType"]) + "; echo './exploit.sh " + str(args["ipToUse"]) + " " + own_ip+ " " + str(args["waitTime"]) + "' ")
+            Popen("cd " + str(args["attackType"]) + "; ./exploit.sh " + str(args["ipToUse"]) + " " + own_ip+ " " + str(args["waitTime"]) + " ")
+            apiKey = True
             return "Started script"
         else:
             return "ERROR, machine already started!"

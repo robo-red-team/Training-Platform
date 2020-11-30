@@ -14,14 +14,14 @@ def LimitInputChars(string):
     return str(re.sub("[^0-9a-zA-Z-=',:.! ]", "", str(string)))
 
 # Get the IP(s) of machines within a category, as list
-def GetCategoryIPs(category):
+def GetCategoryMachines(category):
     global machines
     attackers = []
 
     # Find all of category, and get their IP
     for machine in machines:
         if machine["category"] == str(category):
-            attackers.append(machine["ip"])
+            attackers.append(machine)
     return attackers
 
 # -== Params ==-
@@ -38,13 +38,15 @@ class AddMachine(Resource):
         parser.add_argument("id")
         parser.add_argument("ip")
         parser.add_argument("category")
+        parser.add_argument("name")
         args = parser.parse_args()
 
         # Store data in dict
         machineInfo = {
             "id": LimitInputChars(args["id"]),
             "ip": LimitInputChars(args["ip"]),
-            "category": LimitInputChars(args["category"])
+            "category": LimitInputChars(args["category"]),
+            "name": LimitInputChars(args["name"])
         }
         
         # Add machineInfo to list
@@ -60,14 +62,15 @@ class Start(Resource):
             started = True
             parser = reqparse.RequestParser()
             parser.add_argument("waitTimeMin")
+            
             args = parser.parse_args()
 
             # Get attacker IP(s) and send start request to attacker
-            attackerIPs = GetCategoryIPs("attacker")
-            defenderIPs = GetCategoryIPs("defender")
-            #for attackerIP in attackerIPs:
-                #requests.post("http://" + str(attackerIP) + "/start")
-                # TODO: Add the needed params for the attacker to start
+            attackers = GetCategoryMachines("attacker")
+            defenders = GetCategoryMachines("defender")
+            for attacker,defender in zip(attackers,defenders):
+                requests.post("http://" + attacker["ip"] + ":8855/start?waitTime="+str(args["waitTimeMin"])+"&ipToUse="+defender["ip"]+"&attackType="+attacker["name"])
+                #TODO: Add the needed params for the attacker to start
 
             return "Started"
         else:

@@ -8,7 +8,7 @@ import base64
 from flask import Flask, make_response, render_template, request
 from flask_restful import Resource, Api, reqparse
 from flask_cors import CORS
-from app.dockerController import SpawnContainer, GetContainerIP
+from app.dockerController import SpawnContainer, GetContainerIP, SpawnContainerWithPass
 from app.vagrantController import SpawnVagrantMachine, GetMachineIP
 
 app = Flask(__name__)
@@ -75,10 +75,15 @@ def SpawnMachine(MachineName):
     # If it is a Docker machine
     elif str(machineInfo["type"]) == "docker":
         try:
-            spawnID = SpawnContainer(str(machineInfo["imageName"]))
+            retdict = SpawnContainerWithPass(str(machineInfo["imageName"]))
+            spawnID = retdict["id"]
+            passwd  = retdict["password"]
+            print(spawnID+" "+passwd)
             spawnIP = GetContainerIP(spawnID)
-            return {"id": str(spawnID), "ip": str(spawnIP), "category": machineInfo["category"], "shortDescription": machineInfo["shortDescription"]}
-        except:
+            print(MachineName)
+            return {"id": str(spawnID), "ip": str(spawnIP), "category": machineInfo["category"], "shortDescription": machineInfo["shortDescription"], "password":passwd, "name":MachineName}
+        except e:
+            print(e)
             return False
 
 # Base64 encode a string
@@ -111,7 +116,11 @@ class SpawnCampaign(Resource):
             for machine in campaignInfo["machines"]:
                 machineInfo = SpawnMachine(machine)
                 spawnInfo.append(machineInfo)
-                requests.post("http://" + str(managerIP) + ":8855/addMachine?id=" + LimitInputChars(machineInfo["id"]) + "&ip=" + LimitInputChars(machineInfo["ip"]) + "&category=" + LimitInputChars(machineInfo["category"]))
+                print(machineInfo["name"])
+                print(type(machineInfo["name"]))
+                print(LimitInputChars(machineInfo["name"]))
+                topost = "http://" + str(managerIP) + ":8855/addMachine?id=" + LimitInputChars(machineInfo["id"]) + "&ip=" + LimitInputChars(machineInfo["ip"]) + "&category=" + LimitInputChars(machineInfo["category"]) + "&name=" +machineInfo["name"]
+                requests.post(topost)
 
             # Ensure service have time to add all data
             time.sleep(int(waitTimeForContainerSpawn / 2))

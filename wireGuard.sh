@@ -35,7 +35,7 @@ do
     wg genkey | tee /etc/wireguard/wg-client_private$(($i+1)).key | wg pubkey > /etc/wireguard/wg-client_public$(($i+1)).key
     echo "[Peer]
 PublicKey = $(cat /etc/wireguard/wg-client_public$(($i+1)).key) # client_public.key value.
-AllowedIPs = 10.0.0.$(($i+1))/32, 10.0.0.$(($i+1))/24 # Internal IP address of the VPN client.
+AllowedIPs = 10.0.0.0/8, 192.168.0.0/16, 172.16.0.0/12 # Internal IP address of the VPN client.
 " >> /etc/wireguard/wg0.conf
 done
 

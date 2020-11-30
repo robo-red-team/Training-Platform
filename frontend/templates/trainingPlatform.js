@@ -55,7 +55,7 @@ function GetCampaignInfo() {
 
                 // Add info to HTML, and HTML needed to spawn campaign
                 let infoHTML = `<h3 class="text-center text-light">Campaign: ${campaignInfo["name"]}</h3><p class="text-center text-light">${campaignInfo["description"]}</p>`
-                infoHTML += `<div class="form-group text-center text-light"><input class="fillWidht" type="text" id="key" placeholder="Key"><button class="btn btn-dark fillWidht text-center text-light" onclick="SpawnCampaign()">Spawn Campaign</button></div>`
+                infoHTML += `<div class="form-group text-center text-light"><select class="form-control" id="timeWaitMin"><option vlaue="15">15 minutes before attack</option><option vlaue="30">30 minutes before attack</option><option vlaue="45">45 minutes before attack</option><option vlaue="60">60 minutes before attack</option></select><input class="fillWidht" type="text" id="key" placeholder="Key"><button class="btn btn-dark fillWidht text-center text-light" onclick="SpawnCampaign()">Spawn Campaign</button></div>`
 
                 // Write it to the document
                 document.getElementById("campaignInfo").innerHTML = infoHTML
@@ -77,6 +77,23 @@ function SpawnCampaign() {
     const campaignName = document.getElementById("campaignSelect").value
     const plainKey = document.getElementById("key").value
     const hashedKey = GetHashedKey(plainKey)
+
+    // Set waitTimeMin value, based on selected option
+    let waitTimeMin = document.getElementById("timeWaitMin").selectedIndex
+    switch(waitTimeMin) {
+        case 0:
+            waitTimeMin = 15
+            break
+        case 1:
+            waitTimeMin = 30
+            break
+        case 2: 
+            waitTimeMin = 45
+            break
+        case 3:
+            waitTimeMin = 60
+            break
+    }
     
     // Make async request to get spawn the campaign, and get data
     let httpReq = new XMLHttpRequest();
@@ -88,13 +105,15 @@ function SpawnCampaign() {
             // Make the HTML table to show spawned machine info
             let ids = []
             let ips = []
+            let descriptions = []
             for (i = 0; i < spawnedInfo.length; i++) {
                 ids.push(spawnedInfo[i]["id"])
                 ips.push(spawnedInfo[i]["ip"])
+                descriptions.push(spawnedInfo[i]["shortDescription"])
             }
-            let infoHTML = `<b><h2 class="text-center text-light">Spawned Machines:</h2></b><p class="text-center text-light">Here is the list of spawned machines, which belong to your campaign.</p><table class="table"><thead><tr><th class="text-light" scope="col">Machine ID</th><th class="text-light" scope="col">Local IP</th></tr></thead><tbody>`
+            let infoHTML = `<b><h2 class="text-center text-light">Spawned Machines:</h2></b><p class="text-center text-light">Here is the list of spawned machines, which belong to your campaign.</p><table class="table"><thead><tr><th class="text-light" scope="col">Machine ID</th><th class="text-light" scope="col">Local IP</th><th class="text-light" scope="col">Short description</th></tr></thead><tbody>`
             for (i = 0; i < ids.length; i++) {
-                infoHTML += `<tr><td class="text-light">${ids[i]}</td><td class="text-light">${ips[i]}</td></tr>`
+                infoHTML += `<tr><td class="text-light">${ids[i]}</td><td class="text-light">${ips[i]}</td><td class="text-light">${descriptions[i]}</td></tr>`
             }
             infoHTML += `</tbody></table>`
 
@@ -102,7 +121,7 @@ function SpawnCampaign() {
             document.getElementById("spawnedCampaignInfo").innerHTML = infoHTML
         }
     }
-    httpReq.open("post", `http://${window.location.hostname}:8855/campaignSpawn?name=${campaignName}&key=${hashedKey}`, true);
+    httpReq.open("post", `http://${window.location.hostname}:8855/campaignSpawn?name=${campaignName}&key=${hashedKey}&waitTimeMin=${waitTimeMin}`, true);
     httpReq.send();
 }
 

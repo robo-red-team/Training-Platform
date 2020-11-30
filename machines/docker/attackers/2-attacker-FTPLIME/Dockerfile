@@ -1,6 +1,6 @@
 #From mathias kali image
 FROM kalilinux/kali-rolling:latest
-RUN apt update && apt upgrade -y
+RUN apt update
 RUN apt-get -y install nmap python3 
 WORKDIR /working
 COPY exploit.c exploit.c

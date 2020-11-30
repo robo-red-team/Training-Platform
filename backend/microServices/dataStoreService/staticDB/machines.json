@@ -2,27 +2,43 @@
     {
         "name": "defaultUbuntu",
         "type": "vagrant",
-        "pathFromRoot": "./machines/vagrant/defaultUbuntu/"
+        "pathFromRoot": "./machines/vagrant/defaultUbuntu/",
+        "category": "infrastructure",
+        "shortDescription": "A default Ubuntu machine"
     },
     {
         "name": "dockerTester",
         "type": "docker",
-        "imageName": "docker_tester:latest" 
+        "imageName": "docker_tester:latest",
+        "category": "infrastructure",
+        "shortDescription": "A tester of docker" 
     },
     {
         "name": "1-defender-notessqli",
         "type": "docker",
-        "imageName": "1-defender-notessqli:latest" 
+        "imageName": "1-defender-notessqli:latest",
+        "category": "defender",
+        "shortDescription": "!!! TO BE DESCRIBED !!!" 
     },
     {
         "name": "2-attacker-ftplime",
         "type": "docker",
-        "imageName": "2-attacker-ftplime:latest" 
+        "imageName": "2-attacker-ftplime:latest",
+        "category": "attacker",
+        "shortDescription": "!!! TO BE DESCRIBED !!!"
     },
     {
-        "name": "1-attacker.notessqli",
+        "name": "1-attacker-notessqli",
         "type": "docker",
-        "imageName": "1-attacker.notessqli:latest" 
+        "imageName": "1-attacker-notessqli:latest",
+        "category": "attacker",
+        "shortDescription": "!!! TO BE DESCRIBED !!!" 
+    },
+    {
+        "name": "campaign-manager",
+        "type": "docker",
+        "imageName": "campaign-manager_service:latest",
+        "category": "infrastructure",
+        "shortDescription": "!!! TO BE DESCRIBED !!!"
     }
-    
 ]

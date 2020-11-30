@@ -4,6 +4,7 @@ import re
 import json
 import urllib
 import time
+import base64
 from flask import Flask, make_response, render_template, request
 from flask_restful import Resource, Api, reqparse
 from flask_cors import CORS
@@ -14,6 +15,9 @@ app = Flask(__name__)
 api = Api(app)
 CORS(app)
 app.config["CORS_HEADERS"] = "Content-Type"
+
+# -== Params ==-
+waitTimeForContainerSpawn = 3
 
 # -== Helper functions ==-
 
@@ -50,7 +54,7 @@ def GetJSONDataFromAPI(UrlWithParams):
 # Initialize key in Auth Service
 def InitAuthKey(MachineIP):
     # Give the container time to spawn, then send request to init key
-    time.sleep(5)
+    time.sleep(waitTimeForContainerSpawn)
     cleanKey = str(LimitInputChars(sys.argv[2]))
     requests.post("http://" + str(MachineIP) + ":8855/initKey?key=" + str(cleanKey))
 
@@ -65,7 +69,7 @@ def SpawnMachine(MachineName):
     elif str(machineInfo["type"]) == "vagrant":
         spawned = SpawnVagrantMachine(machineInfo["pathFromRoot"])
         if spawned == True:
-            return {"id": str(machineInfo["name"]), "ip": str(GetMachineIP(str(machineInfo["pathFromRoot"])))}
+            return {"id": str(machineInfo["name"]), "ip": str(GetMachineIP(str(machineInfo["pathFromRoot"]))), "attacker": machineInfo["attacker"], "shortDescription": machineInfo["shortDescription"]}
         else:
             return False
     # If it is a Docker machine
@@ -73,9 +77,13 @@ def SpawnMachine(MachineName):
         try:
             spawnID = SpawnContainer(str(machineInfo["imageName"]))
             spawnIP = GetContainerIP(spawnID)
-            return {"id": str(spawnID), "ip": str(spawnIP)}
+            return {"id": str(spawnID), "ip": str(spawnIP), "category": machineInfo["category"], "shortDescription": machineInfo["shortDescription"]}
         except:
             return False
+
+# Base64 encode a string
+def Base64EncodeString(text):
+    return base64.b64encode(str(text).encode("ascii")).decode("ascii")
 
 # -== Endpoint functionality ==-
 
@@ -85,18 +93,40 @@ class SpawnCampaign(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument("key")
         parser.add_argument("name")
+        parser.add_argument("waitTimeMin")
         args = parser.parse_args()
 
         # Make sure API key is correct
         if ValidateKey(str(LimitInputChars(args["key"]))):
-            campaignInfo = GetJSONDataFromAPI("http://" + datastoreServiceIP + ":8855/campaignInfo?name=" + str(LimitInputChars(args["name"])))
-            # Spawn machines, and store data in list
+            # Fetch data from datastore
+            campaignInfo = GetJSONDataFromAPI("http://" + str(datastoreServiceIP) + ":8855/campaignInfo?name=" + str(LimitInputChars(args["name"])))
+            
+            # Spawn a campaign manager, and wait for it to be done
+            manager = SpawnContainer("campaign-manager_service:latest")
+            managerIP = GetContainerIP(manager)
+            time.sleep(waitTimeForContainerSpawn)
+            
+            # Spawn machines, store data in list, and send info to campaign manager
             spawnInfo = []
             for machine in campaignInfo["machines"]:
-                spawnInfo.append(SpawnMachine(machine))
+                machineInfo = SpawnMachine(machine)
+                spawnInfo.append(machineInfo)
+                requests.post("http://" + str(managerIP) + ":8855/addMachine?id=" + LimitInputChars(machineInfo["id"]) + "&ip=" + LimitInputChars(machineInfo["ip"]) + "&category=" + LimitInputChars(machineInfo["category"]))
+
+            # Ensure service have time to add all data
+            time.sleep(int(waitTimeForContainerSpawn / 2))
+
+            # Start the campaign
+            req = requests.post("http://" + str(managerIP) + ":8855/start?waitTimeMin=" + LimitInputChars(args["waitTimeMin"]))
+            
+            # Return info of all spawned machines, to be displayed on the front-end 
             return spawnInfo
         else:
             return "Invalid key"
+
+# TODO add destruction of campaign machines
+
+# TODO add status updates for a campaign
 
 # Send names of all campaigns
 class CampaignNames(Resource):

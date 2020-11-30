@@ -1,7 +1,7 @@
 [
     {
         "name": "Test1",
-        "machines": ["dockerTester"],
+        "machines": ["dockerTester", "1-attacker-notessqli"],
         "description": "A very nice tester campaign."
     },
     {

@@ -1,7 +1,10 @@
 import re
 import json
 import requests
-from flask import Flask
+import threading
+import base64
+import time
+from flask import Flask, request
 from flask_restful import Resource, Api, reqparse
 
 app = Flask(__name__)
@@ -24,10 +27,21 @@ def GetCategoryMachines(category):
             attackers.append(machine)
     return attackers
 
+# Base64 encode a string
+def Base64EncodeString(text):
+    return base64.b64encode(str(text).encode("ascii")).decode("ascii")
+
+# Used to destroy containers after campaign
+def DestroyThreads(ip, waitTime):
+    global machines
+    time.sleep(waitTime)
+    requests.delete("http://" + str(ip) + ":8855/campaignRemove?containerIDs=" + Base64EncodeString(json.dumps(machines)))
+
 # -== Params ==-
 port = 8855
 machines = []
 started = False
+timeFromAttackToDestroyMin = 5
 
 # -== Endpoint functionality ==-
 
@@ -58,6 +72,8 @@ class AddMachine(Resource):
 class Start(Resource):
     def post(self):
         global started
+        global timeFromAttackToDestroyMin
+
         if not started:
             started = True
             parser = reqparse.RequestParser()
@@ -70,8 +86,13 @@ class Start(Resource):
             defenders = GetCategoryMachines("defender")
             for attacker,defender in zip(attackers,defenders):
                 requests.post("http://" + attacker["ip"] + ":8855/start?waitTime="+str(args["waitTimeMin"])+"&ipToUse="+defender["ip"]+"&attackType="+attacker["name"])
-                #TODO: Add the needed params for the attacker to start
 
+            # Queue request to remove containers, once the machines are done
+            mainAPI_IP = request.remote_addr
+            waitBeforeDestructMin = int(args["waitTimeMin"]) + int(timeFromAttackToDestroyMin)
+            waitBeforeDestructSec = waitBeforeDestructMin * 60
+            thread = threading.Thread(target=DestroyThreads, args=(str(mainAPI_IP), int(waitBeforeDestructSec)))
+            thread.start()
             return "Started"
         else:
             return "ERROR: Campaign already started"

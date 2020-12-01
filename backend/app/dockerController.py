@@ -1,8 +1,8 @@
 import docker
 import random
 import string
-client = docker.from_env()
 
+client = docker.from_env()
 
 def get_random_string(length):
     letters = string.ascii_lowercase
@@ -18,7 +18,6 @@ def SpawnContainerWithPass(ContainerName):
     container = client.containers.run(ContainerName, passwd, detach=True)
     return {"id":str(container.id[0:10]),"password":passwd}
 
-    
 def GetAllContainers():
     return client.containers.list()
 

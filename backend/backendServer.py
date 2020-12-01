@@ -5,7 +5,9 @@ import json
 import urllib
 import time
 import base64
-from flask import Flask, make_response, render_template, request
+import glob
+import os
+from flask import Flask, make_response, render_template, request, send_file, abort
 from flask_restful import Resource, Api, reqparse
 from flask_cors import CORS
 from app.dockerController import SpawnContainer, GetContainerIP, SpawnContainerWithPass, StopContainer
@@ -82,8 +84,7 @@ def SpawnMachine(MachineName):
             spawnIP = GetContainerIP(spawnID)
             print(MachineName)
             return {"id": str(spawnID), "ip": str(spawnIP), "category": machineInfo["category"], "shortDescription": machineInfo["shortDescription"], "password":passwd, "name":MachineName}
-        except e:
-            print(e)
+        except:
             return False
 
 # Base64 encode a string
@@ -132,12 +133,12 @@ class SpawnCampaign(Resource):
             time.sleep(int(waitTimeForContainerSpawn / 2))
 
             # Start the campaign
-            req = requests.post("http://" + str(managerIP) + ":8855/start?waitTimeMin=" + LimitInputChars(args["waitTimeMin"]))
+            requests.post("http://" + str(managerIP) + ":8855/start?waitTimeMin=" + LimitInputChars(args["waitTimeMin"]))
             
             # Return info of all spawned machines, to be displayed on the front-end 
             return spawnInfo
         else:
-            return "Invalid key"
+            abort(401)
 
 # TODO add status updates for a campaign
 
@@ -175,11 +176,40 @@ class CampaignRemoval(Resource):
 
         return "Stopped campaign machines"
 
+# Get a VPN bundle, and delete it form this machine
+class GetVPNBundle(Resource):
+    def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument("key")
+        args = parser.parse_args()
+        
+        # Make sure the key is valid
+        if ValidateKey(str(LimitInputChars(args["key"]))):
+            # Get all file locations
+            pathToFolder = os.getcwd()
+            folder = str(pathToFolder) + "/backend/vpnBundles/"
+            fileLocations = glob.glob(folder + "*")
+            
+            # Send and delete file, if any is found
+            if len(fileLocations) > 0:
+
+                # TODO: Remove file after being sent
+
+                try:
+                    return send_file(fileLocations[0], as_attachment=True, attachment_filename='RoboRedTeam.vpn')
+                except:
+                    abort(404)
+            else:
+                abort(404)
+        else:
+            abort(401)
+
 # -== Endpoints ==-
 api.add_resource(SpawnCampaign, "/campaignSpawn")
 api.add_resource(CampaignNames, "/campaignNames")
 api.add_resource(CampaignInfo, "/campaignInfo")
 api.add_resource(CampaignRemoval, "/campaignRemove")
+api.add_resource(GetVPNBundle, "/vpnBundle")
 
 # -== SpawnMicroServices ==-
 authService = SpawnContainer("auth_service:latest")

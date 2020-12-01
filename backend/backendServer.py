@@ -8,7 +8,7 @@ import base64
 from flask import Flask, make_response, render_template, request
 from flask_restful import Resource, Api, reqparse
 from flask_cors import CORS
-from app.dockerController import SpawnContainer, GetContainerIP, SpawnContainerWithPass
+from app.dockerController import SpawnContainer, GetContainerIP, SpawnContainerWithPass, StopContainer
 from app.vagrantController import SpawnVagrantMachine, GetMachineIP
 
 app = Flask(__name__)
@@ -90,6 +90,10 @@ def SpawnMachine(MachineName):
 def Base64EncodeString(text):
     return base64.b64encode(str(text).encode("ascii")).decode("ascii")
 
+# Base64 decode a string
+def Base64DecodeString(text):
+    return base64.b64decode(text.encode("ascii")).decode("ascii")
+
 # -== Endpoint functionality ==-
 
 # Spawn a campaign if API key is correct
@@ -110,6 +114,8 @@ class SpawnCampaign(Resource):
             manager = SpawnContainer("campaign-manager_service:latest")
             managerIP = GetContainerIP(manager)
             time.sleep(waitTimeForContainerSpawn)
+            # Add info about the campaign manager to it's list of containers
+            requests.post("http://" + str(managerIP) + ":8855/addMachine?id=" + LimitInputChars(manager) + "&ip=" + LimitInputChars(managerIP) + "&category=" + "infrastructure" + "&name=" + "campaignManager")
             
             # Spawn machines, store data in list, and send info to campaign manager
             spawnInfo = []
@@ -133,8 +139,6 @@ class SpawnCampaign(Resource):
         else:
             return "Invalid key"
 
-# TODO add destruction of campaign machines
-
 # TODO add status updates for a campaign
 
 # Send names of all campaigns
@@ -155,10 +159,27 @@ class CampaignInfo(Resource):
         else:
             return {"name": allInfo["name"], "description": allInfo["description"]}
 
+# Removing all files from the machine, called after a successfull campaign
+class CampaignRemoval(Resource):
+    def delete(self):
+        # Get data and decode it
+        parser = reqparse.RequestParser()
+        parser.add_argument("containerIDs")
+        args = parser.parse_args()
+        data = json.loads(Base64DecodeString(args["containerIDs"]))
+
+        # Loop through all machines and stop them
+        for machine in data:
+            if not machine["id"] == None and not machine["id"] == "":
+                StopContainer(LimitInputChars(machine["id"]))
+
+        return "Stopped campaign machines"
+
 # -== Endpoints ==-
 api.add_resource(SpawnCampaign, "/campaignSpawn")
 api.add_resource(CampaignNames, "/campaignNames")
 api.add_resource(CampaignInfo, "/campaignInfo")
+api.add_resource(CampaignRemoval, "/campaignRemove")
 
 # -== SpawnMicroServices ==-
 authService = SpawnContainer("auth_service:latest")

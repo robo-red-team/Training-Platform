@@ -55,7 +55,7 @@ function GetCampaignInfo() {
 
                 // Add info to HTML, and HTML needed to spawn campaign
                 let infoHTML = `<h3 class="text-center text-light">Campaign: ${campaignInfo["name"]}</h3><p class="text-center text-light">${campaignInfo["description"]}</p>`
-                infoHTML += `<div class="form-group text-center text-light"><select class="form-control" id="timeWaitMin"><option vlaue="15">15 minutes before attack</option><option vlaue="30">30 minutes before attack</option><option vlaue="45">45 minutes before attack</option><option vlaue="60">60 minutes before attack</option></select><input class="fillWidht" type="text" id="key" placeholder="Key"><button class="btn btn-dark fillWidht text-center text-light" onclick="SpawnCampaign()">Spawn Campaign</button></div>`
+                infoHTML += `<div class="form-group text-center text-light"><select class="form-control" id="timeWaitMin"><option vlaue="15">15 minutes before attack</option><option vlaue="30">30 minutes before attack</option><option vlaue="45">45 minutes before attack</option><option vlaue="60">60 minutes before attack</option></select><input class="fillWidht" type="text" id="key" placeholder="Key"><button class="btn btn-dark fillWidht text-center text-light" onclick="SpawnCampaign()">Spawn Campaign</button><button class="btn btn-secondary fillWidht text-center text-light" onclick="GetVPNBundle()">Get VPN bundle</button></div>`
 
                 // Write it to the document
                 document.getElementById("campaignInfo").innerHTML = infoHTML
@@ -66,6 +66,14 @@ function GetCampaignInfo() {
     } else {
         document.getElementById("campaignInfo").innerHTML = `<b><p class="text-center text-light">You have to accept the rules, if you wish to use our training platform!</p></b>`
     }
+}
+
+// Get a VPN bundle
+function GetVPNBundle() {
+    // Get key
+    const plainKey = document.getElementById("key").value
+    const hashedKey = GetHashedKey(plainKey)
+    window.open(`http://${window.location.hostname}:8855/vpnBundle?key=${hashedKey}`, "_blank");
 }
 
 // Spawn the selected campaign, if the API key is correct

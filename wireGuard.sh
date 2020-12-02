@@ -6,7 +6,7 @@ apt-get update
 apt-get install linux-headers-$(uname -r|sed 's/[^-]*-[^-]*-//')
 # Setup Wireguard
 apt-get install wireguard
-wg genkey | tee /etc/wireguard/wg-server_private.key | wg pubkey > /etc/wireguard/wg-pserver_public.key
+wg genkey | tee /etc/wireguard/wg-server_private.key | wg pubkey > /etc/wireguard/wg-server_public.key
 
 privateKeyValue=$(cat /etc/wireguard/wg-server_private.key)
 
@@ -32,11 +32,18 @@ numberOfClients=5
 #Adds "numberOfClients" amount of clients to the server config file
 for i in $(eval echo "{1..$numberOfClients}")
 do
-    wg genkey | tee /etc/wireguard/wg-client_private$(($i+1)).key | wg pubkey > /etc/wireguard/wg-client_public$(($i+1)).key
+    mkdir /etc/wireguard/keys_for_$(($i))
+    wg genkey | tee /etc/wireguard/keys_for_$(($i))/wg-client_private.key | wg pubkey > /etc/wireguard/keys_for_$(($i))/wg-client_public.key
     echo "[Peer]
-PublicKey = $(cat /etc/wireguard/wg-client_public$(($i+1)).key) # client_public.key value.
+PublicKey = $(cat /etc/wireguard/keys_for_$(($i))/wg-client_public.key) # client_public.key value.
 AllowedIPs = 10.0.0.0/8, 192.168.0.0/16, 172.16.0.0/12 # Internal IP address of the VPN client.
 " >> /etc/wireguard/wg0.conf
+
+pushd /etc/wireguard
+zip -r /etc/wireguard/bundle$(($i)).zip keys_for_$(($i))
+popd
+pwd
+mv /etc/wireguard/bundle$(($i)).zip ./backend/vpnBundles
 done
 
 systemctl restart wg-quick@wg0

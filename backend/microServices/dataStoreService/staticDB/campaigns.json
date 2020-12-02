@@ -1,17 +1,12 @@
 [
     {
         "name": "Test1",
-        "machines": ["dockerTester", "1-attacker-notessqli"],
+        "machines": ["dockerTester", "dockerattacker"],
         "description": "A very nice tester campaign."
     },
     {
-        "name": "Test2",
-        "machines": ["dockerTester", "defaultUbuntu"],
-        "description": "A tester campaign which spawns both machines."
-    },
-    {
         "name": "Actualcampaign",
-        "machines": ["1-defender-notessqli", "1-attacker-notessqli"],
+        "machines": ["1-defender-notessqli", "dockerattacker"],
         "description": "Actualcampaign"
     }
 ]

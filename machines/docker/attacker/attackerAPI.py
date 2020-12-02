@@ -8,7 +8,7 @@ app = Flask(__name__)
 api = Api(app)
 
 # -== stored variables ==-
-campaignResult = None
+campaignResult = {"info":"script not ran yet"}
 # -== Helper functions ==-
 
 # Limit the amount of valid input chars, to increase security

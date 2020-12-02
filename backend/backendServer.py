@@ -77,12 +77,11 @@ def SpawnMachine(MachineName):
     # If it is a Docker machine
     elif str(machineInfo["type"]) == "docker":
         try:
+            print(machineInfo["imageName"], file=sys.stderr))
             retdict = SpawnContainerWithPass(str(machineInfo["imageName"]))
             spawnID = retdict["id"]
             passwd  = retdict["password"]
-            print(spawnID+" "+passwd)
             spawnIP = GetContainerIP(spawnID)
-            print(MachineName)
             return {"id": str(spawnID), "ip": str(spawnIP), "category": machineInfo["category"], "shortDescription": machineInfo["shortDescription"], "password":passwd, "name":MachineName}
         except:
             return False
@@ -123,9 +122,6 @@ class SpawnCampaign(Resource):
             for machine in campaignInfo["machines"]:
                 machineInfo = SpawnMachine(machine)
                 spawnInfo.append(machineInfo)
-                print(machineInfo["name"])
-                print(type(machineInfo["name"]))
-                print(LimitInputChars(machineInfo["name"]))
                 topost = "http://" + str(managerIP) + ":8855/addMachine?id=" + LimitInputChars(machineInfo["id"]) + "&ip=" + LimitInputChars(machineInfo["ip"]) + "&category=" + LimitInputChars(machineInfo["category"]) + "&name=" +machineInfo["name"]
                 requests.post(topost)
 
@@ -163,6 +159,15 @@ class CampaignInfo(Resource):
             return {"name": "ERROR", "description": "Error getting campaign data!"}
         else:
             return {"name": allInfo["name"], "description": allInfo["description"]}
+
+class CampaignResults(Resource):
+    def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument("id")
+        args = parser.parse_args()
+        results = requests.get("http://"+Base64DecodeString(args["id"])+":8855/"+"campaignResults")        
+        return results.text
+        
 
 # Removing all files from the machine, called after a successfull campaign
 class CampaignRemoval(Resource):
@@ -215,11 +220,13 @@ api.add_resource(CampaignNames, "/campaignNames")
 api.add_resource(CampaignInfo, "/campaignInfo")
 api.add_resource(CampaignRemoval, "/campaignRemove")
 api.add_resource(GetVPNBundle, "/vpnBundle")
+api.add_resource(CampaignResults, "/campaignResults")
+
 
 
 # -== SpawnMicroServices ==-
 authService = SpawnContainer("auth_service:latest")
-authServiceIP = GetContainerIP(authService)
+authServiceIP = GetContainerIP(authService) 
 InitAuthKey(authServiceIP)
 datastoreService = SpawnContainer("datastore_service:latest")
 datastoreServiceIP = GetContainerIP(datastoreService)
@@ -228,4 +235,4 @@ datastoreServiceIP = GetContainerIP(datastoreService)
 # Validate input, if correct then start server
 port = sys.argv[1]
 if int(port) >= 0 and int(port) <= 65535: 
-    app.run(threaded=True, debug=False, port=int(port), host="0.0.0.0")
+    app.run(threaded=True, debug=True, port=int(port), host="0.0.0.0")

@@ -100,16 +100,15 @@ class Start(Resource):
         else:
             return "ERROR: Campaign already started"
 
+# Get campaign results from attacker machine
 class CampaignResults(Resource):
     def get(self):
-        log = open("log.txt","a+")
         attackers = GetCategoryMachines("attacker")
-        log.write(attackers)
-        results=""
+        results=[]
         for attacker in attackers:
-            results += requests.get("http://"+attacker["ip"]+":8855/"+"info")
-            log.write(results.text)
-        return results.text
+            req = requests.get("http://"+attacker["ip"]+":8855/"+"info")
+            results.append(req.text)
+        return json.dumps(results)
 
 # -== Endpoints ==-
 api.add_resource(AddMachine, "/addMachine")

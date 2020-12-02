@@ -1,5 +1,7 @@
 import re
 import os
+import json
+import base64
 from flask import Flask, jsonify,request
 from flask_restful import Resource, Api, reqparse
 from subprocess import Popen
@@ -10,6 +12,10 @@ api = Api(app)
 # -== stored variables ==-
 campaignResult = {"info":"script not ran yet"}
 # -== Helper functions ==-
+
+# Base64 encode a string
+def Base64EncodeString(text):
+    return base64.b64encode(str(text).encode("ascii")).decode("ascii")
 
 # Limit the amount of valid input chars, to increase security
 def LimitInputChars(string):
@@ -46,10 +52,11 @@ class Info(Resource):
         campaignResult =  json_data
         return "posted data."
 
+#Returning the json in base64 encoded format
     def get(self):
         global campaignResult
-        return campaignResult
-
+        toreturn = Base64EncodeString(json.dumps(campaignResult))
+        return toreturn
 
 # -== Endpoints ==-
 api.add_resource(Start, "/start")

@@ -77,11 +77,17 @@ def SpawnMachine(MachineName):
     # If it is a Docker machine
     elif str(machineInfo["type"]) == "docker":
         try:
-            print(machineInfo["imageName"], file=sys.stderr))
-            retdict = SpawnContainerWithPass(str(machineInfo["imageName"]))
-            spawnID = retdict["id"]
-            passwd  = retdict["password"]
+
+            if str(machineInfo["category"]) == "defender":
+                retdict = SpawnContainerWithPass(str(machineInfo["imageName"]))
+                spawnID = retdict["id"]
+                passwd  = retdict["password"]  
+            else:
+                spawnID = SpawnContainer(str(machineInfo["imageName"]))
+                passwd = "No pass"
             spawnIP = GetContainerIP(spawnID)
+
+
             return {"id": str(spawnID), "ip": str(spawnIP), "category": machineInfo["category"], "shortDescription": machineInfo["shortDescription"], "password":passwd, "name":MachineName}
         except:
             return False
@@ -140,7 +146,6 @@ class SpawnCampaign(Resource):
         else:
             abort(401)
 
-# TODO add status updates for a campaign
 
 # Send names of all campaigns
 class CampaignNames(Resource):
@@ -160,15 +165,15 @@ class CampaignInfo(Resource):
         else:
             return {"name": allInfo["name"], "description": allInfo["description"]}
 
+# Get campaign results
 class CampaignResults(Resource):
     def get(self):
         parser = reqparse.RequestParser()
         parser.add_argument("id")
         args = parser.parse_args()
         results = requests.get("http://"+Base64DecodeString(args["id"])+":8855/"+"campaignResults")        
-        return results.text
+        return json.dumps(results.text)
         
-
 # Removing all files from the machine, called after a successfull campaign
 class CampaignRemoval(Resource):
     def delete(self):
@@ -235,4 +240,4 @@ datastoreServiceIP = GetContainerIP(datastoreService)
 # Validate input, if correct then start server
 port = sys.argv[1]
 if int(port) >= 0 and int(port) <= 65535: 
-    app.run(threaded=True, debug=True, port=int(port), host="0.0.0.0")
+    app.run(threaded=True, debug=False, port=int(port), host="0.0.0.0")

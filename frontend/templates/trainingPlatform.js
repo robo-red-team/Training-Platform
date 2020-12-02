@@ -1,3 +1,6 @@
+// -=== Global variables ===-
+let campaignID = ""
+
 // -=== Functions ===-
 
 // Generate a SHA256 hash of key
@@ -108,7 +111,9 @@ function SpawnCampaign() {
     httpReq.onreadystatechange = function() {
         // When we get a response, do this:
         if (httpReq.readyState == XMLHttpRequest.DONE) {
-            const spawnedInfo = JSON.parse(httpReq.response)
+            const campaignInfo = JSON.parse(httpReq.response)
+            const spawnedInfo = campaignInfo["machines"]
+            campaignID = campaignInfo["id"]
             
             // Make the HTML table to show spawned machine info
             let ids = []
@@ -121,7 +126,8 @@ function SpawnCampaign() {
                 descriptions.push(spawnedInfo[i]["shortDescription"])
                 sshpass.push(spawnedInfo[i]["password"])
             }
-            let infoHTML = `<b><h2 class="text-center text-light">Spawned Machines:</h2></b><p class="text-center text-light">Here is the list of spawned machines, which belong to your campaign.</p><table class="table"><thead><tr><th class="text-light" scope="col">Machine ID</th><th class="text-light" scope="col">Local IP</th><th class="text-light" scope="col">Short description</th><th class="text-light">SSH password</th></tr></thead><tbody>`
+            
+            let infoHTML = `<b><h2 class="text-center text-light">Spawned Machines:</h2></b><h4 class="text-center text-light">Campaign id: ${campaignID}</h4><p class="text-center text-light">Here is the list of spawned machines, which belong to your campaign.</p><table class="table"><thead><tr><th class="text-light" scope="col">Machine ID</th><th class="text-light" scope="col">Local IP</th><th class="text-light" scope="col">Short description</th><th class="text-light">SSH password</th></tr></thead><tbody>`
             for (i = 0; i < ids.length; i++) {
                 infoHTML += `<tr><td class="text-light">${ids[i]}</td><td class="text-light">${ips[i]}</td><td class="text-light">${descriptions[i]}</td><td class="text-light">${sshpass[i]}</td></tr>`
             }

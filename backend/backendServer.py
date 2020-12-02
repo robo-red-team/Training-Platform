@@ -136,7 +136,11 @@ class SpawnCampaign(Resource):
             requests.post("http://" + str(managerIP) + ":8855/start?waitTimeMin=" + LimitInputChars(args["waitTimeMin"]))
             
             # Return info of all spawned machines, to be displayed on the front-end 
-            return spawnInfo
+            campaignReturn = {
+                "id": Base64EncodeString(managerIP),
+                "machines": spawnInfo
+            }
+            return campaignReturn
         else:
             abort(401)
 
@@ -204,12 +208,14 @@ class GetVPNBundle(Resource):
         else:
             abort(401)
 
+
 # -== Endpoints ==-
 api.add_resource(SpawnCampaign, "/campaignSpawn")
 api.add_resource(CampaignNames, "/campaignNames")
 api.add_resource(CampaignInfo, "/campaignInfo")
 api.add_resource(CampaignRemoval, "/campaignRemove")
 api.add_resource(GetVPNBundle, "/vpnBundle")
+
 
 # -== SpawnMicroServices ==-
 authService = SpawnContainer("auth_service:latest")

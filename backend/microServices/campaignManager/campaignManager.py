@@ -107,8 +107,8 @@ class CampaignResults(Resource):
         results=[]
         for attacker in attackers:
             req = requests.get("http://"+attacker["ip"]+":8855/"+"info")
-            results.append(req.text)
-        return json.dumps(results)
+            results.append(json.loads(req.text))
+        return results 
 
 # -== Endpoints ==-
 api.add_resource(AddMachine, "/addMachine")

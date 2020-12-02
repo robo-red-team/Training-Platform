@@ -55,8 +55,9 @@ class Info(Resource):
 #Returning the json in base64 encoded format
     def get(self):
         global campaignResult
-        toreturn = Base64EncodeString(json.dumps(campaignResult))
+        toreturn = campaignResult
         return toreturn
+
 
 # -== Endpoints ==-
 api.add_resource(Start, "/start")

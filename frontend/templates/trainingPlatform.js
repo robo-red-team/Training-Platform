@@ -66,6 +66,7 @@ function GetCampaignInfo() {
         }
         httpReq.open("get", `http://${window.location.hostname}:8855/campaignInfo?name=${campaignName}`, true);
         httpReq.send();
+        
     } else {
         document.getElementById("campaignInfo").innerHTML = `<b><p class="text-center text-light">You have to accept the rules, if you wish to use our training platform!</p></b>`
     }
@@ -93,7 +94,7 @@ function SpawnCampaign() {
     let waitTimeMin = document.getElementById("timeWaitMin").selectedIndex
     switch(waitTimeMin) {
         case 0:
-            waitTimeMin = 1
+            waitTimeMin = 15
             break
         case 1:
             waitTimeMin = 30
@@ -137,9 +138,52 @@ function SpawnCampaign() {
             document.getElementById("spawnedCampaignInfo").innerHTML = infoHTML
         }
     }
+    document.getElementById('myButton').style.display = ""
     httpReq.open("post", `http://${window.location.hostname}:8855/campaignSpawn?name=${campaignName}&key=${hashedKey}&waitTimeMin=${waitTimeMin}`, true);
     httpReq.send();
 }
 
+function SetUpAsyncButton() {
+    var myButton = document.querySelector('#myButton');
+    myButton.addEventListener('click', GetCampaignResultsAJAX);
+}
+
+
+function GetCampaignResultsAJAX(){
+    url = `http://${window.location.hostname}:8855/campaignResults?id=${campaignID}`
+    var request = new XMLHttpRequest();
+    request.open('GET', url);
+    request.addEventListener('readystatechange', handleResponse);
+    request.send();
+}
+
+function handleResponse() {
+    // "this" refers to the object we called addEventListener on
+    var request = this;
+
+    /*
+    Exit this function unless the AJAX request is complete,
+    and the server has responded.
+    */
+    if (request.readyState != 4)
+        return;
+
+    // If there wasn't an error, run our showResponse function
+    if (request.status == 200) {
+        var ajaxResponse = request.responseText;
+
+        showResponse(ajaxResponse);
+    }
+}
+
+function showResponse(ajaxResponse) {
+    var responseContainer = document.querySelector('#responseContainer');
+    jsonResp = JSON.parse(ajaxResponse)
+
+    responseContainer.innerHTML = ajaxResponse;
+}
+
+
 // -=== Initialization ===-
 FillCampaignInfo()
+SetUpAsyncButton()

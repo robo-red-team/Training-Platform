@@ -91,25 +91,25 @@ toPost= {
         {
             "name": "bypass login",
             "description": "True if sqli allows bypassing login",
-            "patched": bypassable,
+            "patched": not bypassable,
             "score": 20
         },
         {
             "name": "Inject in ID",
             "description": "True if you can still inject sql in the id field.",
-            "patched": idinjectable,
+            "patched": not idinjectable,
             "score": 10
         },
         {
             "name": "Import any note",
             "description": "True if you could still do sqli in the note import field.",
-            "patched": importinjectable,
+            "patched": not importinjectable,
             "score": 30
         },
         {
             "name": "Password grabbable",
             "description": "True if an attacker can import a note that contains another users password",
-            "patched": passwordgrabbable,
+            "patched": not passwordgrabbable,
             "score": 50
         }
     ]

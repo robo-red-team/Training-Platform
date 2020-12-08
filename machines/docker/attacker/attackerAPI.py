@@ -37,7 +37,7 @@ class Start(Resource):
             parser.add_argument("attackType")
             args = parser.parse_args()            
             path = os.path.dirname(os.path.realpath(__file__))
-            Popen(["bash",path+"/"+str(args["attackType"])+"/exploit.sh",str(args["ipToUse"]),own_ip,str(args["waitTime"])]) #List instead of straight command
+            Popen(["bash",path+"/"+str(args["attackType"])+"/exploit.sh",str(args["ipToUse"]),own_ip,str(args["waitTime"]*60)]) #List instead of straight command
             started = True
             return "Started script"
         else:

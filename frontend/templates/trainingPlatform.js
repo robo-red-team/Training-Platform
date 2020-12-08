@@ -94,7 +94,7 @@ function SpawnCampaign() {
     let waitTimeMin = document.getElementById("timeWaitMin").selectedIndex
     switch(waitTimeMin) {
         case 0:
-            waitTimeMin = 1
+            waitTimeMin = 15
             break
         case 1:
             waitTimeMin = 30

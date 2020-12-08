@@ -94,7 +94,7 @@ function SpawnCampaign() {
     let waitTimeMin = document.getElementById("timeWaitMin").selectedIndex
     switch(waitTimeMin) {
         case 0:
-            waitTimeMin = 15
+            waitTimeMin = 1
             break
         case 1:
             waitTimeMin = 30
@@ -179,8 +179,44 @@ function handleResponse() {
 function showResponse(ajaxResponse) {
     var responseContainer = document.querySelector('#responseContainer');
     jsonResp = JSON.parse(ajaxResponse)
+    console.log(ajaxResponse)
+    console.log(jsonResp)
+    response = "";
+    if(ajaxResponse.includes("script not ran yet")){
+        response += '<h2 class="text-center text-light">Attacker has not started yet</h2>'
+    }else if(ajaxResponse.includes("script running")){
+        response +='<h2 class="text-center text-light">Attacker is running, refresh in a few minutes to get results'
+    }else{
+        response += `<h2 class="text-center text-light">${jsonResp[0]["attackName"]} attack has completed, here are the results</h2>`
+        let campaigninfo = jsonResp[0]["checks"];
+        let descriptions = [];
+        let names = [];
+        let patcheds = [];
+        let scores = [];
+        for (i = 0; i < campaigninfo.length; i++) {
+            descriptions.push(campaigninfo[i]["description"]);
+            names.push(campaigninfo[i]["name"]);
+            patcheds.push(campaigninfo[i]["patched"]);
+            scores.push(campaigninfo[i]["score"]);
+        }
+        response = `<table class="table"><thead><tr><th class="text-light" scope="col">Description</th><th class="text-light" scope="col">Name</th><th class="text-light" scope="col">Patched?</th><th class="text-light">Score</th></tr></thead><tbody>`
+            for (i = 0; i < descriptions.length; i++) {
+                response += `<tr><td class="text-light">${descriptions[i]}</td><td class="text-light">${names[i]}</td><td class="text-light">${patcheds[i]}</td><td class="text-light">${scores[i]}</td></tr>`;
+            }
+            response += `</tbody></table>`;
 
-    responseContainer.innerHTML = ajaxResponse;
+            points = 0;
+            total = 0;
+            for (i = 0; i < campaigninfo.length; i++) {
+                total += scores[i];
+                if(patcheds[i]){
+                    points += scores[i];
+                }
+            }
+            response += `<h2 class="text-center text-light"> You scored ${points} / ${total}</h2>`
+    }
+
+    responseContainer.innerHTML = response;
 }
 
 

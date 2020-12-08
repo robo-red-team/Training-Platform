@@ -29,6 +29,9 @@ PostDown = iptables -D FORWARD -i wg0 -j ACCEPT; iptables -t nat -D POSTROUTING 
 
 numberOfClients=5
 
+#Get IP of server for client config file
+server_IP=$(hostname -I | awk '{print $1}')
+
 #Adds "numberOfClients" amount of clients to the server config file
 for i in $(eval echo "{1..$numberOfClients}")
 do
@@ -38,6 +41,19 @@ do
 PublicKey = $(cat /etc/wireguard/keys_for_$(($i))/wg-client_public.key) # client_public.key value.
 AllowedIPs = 10.0.0.0/8, 192.168.0.0/16, 172.16.0.0/12 # Internal IP address of the VPN client.
 " >> /etc/wireguard/wg0.conf
+
+echo "[Interface]
+PrivateKey = $(cat /etc/wireguard/keys_for_$(($i))/wg-client_private.key) # client_public.key value.
+# Switch DNS server while connected
+DNS = 8.8.8.8 
+Address = 10.0.0.$(($i+1))/32
+
+[Peer]
+PublicKey = $(cat /etc/wireguard/wg-server_public.key)
+AllowedIPs = 0.0.0.0/0, ::/0
+Endpoint = $server_IP:56
+PersistentKeepalive = 25
+" > /etc/wireguard/keys_for_$(($i))/wg0.conf
 
 pushd /etc/wireguard
 zip -r /etc/wireguard/bundle$(($i)).zip keys_for_$(($i))

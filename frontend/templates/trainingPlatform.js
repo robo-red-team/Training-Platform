@@ -66,6 +66,7 @@ function GetCampaignInfo() {
         }
         httpReq.open("get", `http://${window.location.hostname}:8855/campaignInfo?name=${campaignName}`, true);
         httpReq.send();
+        
     } else {
         document.getElementById("campaignInfo").innerHTML = `<b><p class="text-center text-light">You have to accept the rules, if you wish to use our training platform!</p></b>`
     }
@@ -93,7 +94,7 @@ function SpawnCampaign() {
     let waitTimeMin = document.getElementById("timeWaitMin").selectedIndex
     switch(waitTimeMin) {
         case 0:
-            waitTimeMin = 15
+            waitTimeMin = 1
             break
         case 1:
             waitTimeMin = 30
@@ -137,9 +138,88 @@ function SpawnCampaign() {
             document.getElementById("spawnedCampaignInfo").innerHTML = infoHTML
         }
     }
+    document.getElementById('myButton').style.display = ""
     httpReq.open("post", `http://${window.location.hostname}:8855/campaignSpawn?name=${campaignName}&key=${hashedKey}&waitTimeMin=${waitTimeMin}`, true);
     httpReq.send();
 }
 
+function SetUpAsyncButton() {
+    var myButton = document.querySelector('#myButton');
+    myButton.addEventListener('click', GetCampaignResultsAJAX);
+}
+
+
+function GetCampaignResultsAJAX(){
+    url = `http://${window.location.hostname}:8855/campaignResults?id=${campaignID}`
+    var request = new XMLHttpRequest();
+    request.open('GET', url);
+    request.addEventListener('readystatechange', handleResponse);
+    request.send();
+}
+
+function handleResponse() {
+    // "this" refers to the object we called addEventListener on
+    var request = this;
+
+    /*
+    Exit this function unless the AJAX request is complete,
+    and the server has responded.
+    */
+    if (request.readyState != 4)
+        return;
+
+    // If there wasn't an error, run our showResponse function
+    if (request.status == 200) {
+        var ajaxResponse = request.responseText;
+
+        showResponse(ajaxResponse);
+    }
+}
+
+function showResponse(ajaxResponse) {
+    var responseContainer = document.querySelector('#responseContainer');
+    jsonResp = JSON.parse(ajaxResponse)
+    console.log(ajaxResponse)
+    console.log(jsonResp)
+    response = "";
+    if(ajaxResponse.includes("script not ran yet")){
+        response += '<h2 class="text-center text-light">Attacker has not started yet</h2>'
+    }else if(ajaxResponse.includes("script running")){
+        response +='<h2 class="text-center text-light">Attacker is running, refresh in a few minutes to get results'
+    }else{
+        response += `<h2 class="text-center text-light">${jsonResp[0]["attackName"]} attack has completed, here are the results</h2>`
+        let campaigninfo = jsonResp[0]["checks"];
+        let descriptions = [];
+        let names = [];
+        let patcheds = [];
+        let scores = [];
+        for (i = 0; i < campaigninfo.length; i++) {
+            descriptions.push(campaigninfo[i]["description"]);
+            names.push(campaigninfo[i]["name"]);
+            patcheds.push(campaigninfo[i]["patched"]);
+            scores.push(campaigninfo[i]["score"]);
+        }
+        response = `<table class="table"><thead><tr><th class="text-light" scope="col">Description</th><th class="text-light" scope="col">Name</th><th class="text-light" scope="col">Patched?</th><th class="text-light">Score</th></tr></thead><tbody>`
+            for (i = 0; i < descriptions.length; i++) {
+                response += `<tr><td class="text-light">${descriptions[i]}</td><td class="text-light">${names[i]}</td><td class="text-light">${patcheds[i]}</td><td class="text-light">${scores[i]}</td></tr>`;
+            }
+            response += `</tbody></table>`;
+
+            points = 0;
+            total = 0;
+            for (i = 0; i < campaigninfo.length; i++) {
+                total += scores[i];
+                if(patcheds[i]){
+                    points += scores[i];
+                }
+            }
+            response += `<h2 class="text-center text-light"> You scored ${points} / ${total}</h2>`
+    }
+
+    responseContainer.innerHTML = response;
+}
+
+
 // -=== Initialization ===-
 FillCampaignInfo()
+SetUpAsyncButton()

@@ -21,18 +21,11 @@
         "shortDescription": "Sql injectable flask site" 
     },
     {
-        "name": "2-attacker-ftplime",
+        "name": "dockerattacker",
         "type": "docker",
-        "imageName": "2-attacker-ftplime:latest",
+        "imageName": "dockerattacker:latest",
         "category": "attacker",
-        "shortDescription": "!!! TO BE DESCRIBED !!!"
-    },
-    {
-        "name": "1-attacker-notessqli",
-        "type": "docker",
-        "imageName": "1-attacker-notessqli:latest",
-        "category": "attacker",
-        "shortDescription": "The attacker machine for the notes sqli" 
+        "shortDescription": "The attacker machine." 
     },
     {
         "name": "campaign-manager",

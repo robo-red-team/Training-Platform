@@ -45,6 +45,8 @@ timeFromAttackToDestroyMin = 5
 
 # -== Endpoint functionality ==-
 
+
+
 # Each call will add a machine to the machines, list
 class AddMachine(Resource):
     def post(self):
@@ -85,7 +87,8 @@ class Start(Resource):
             attackers = GetCategoryMachines("attacker")
             defenders = GetCategoryMachines("defender")
             for attacker,defender in zip(attackers,defenders):
-                requests.post("http://" + attacker["ip"] + ":8855/start?waitTime="+str(args["waitTimeMin"])+"&ipToUse="+defender["ip"]+"&attackType="+attacker["name"])
+                topost = "http://" + attacker["ip"] + ":8855/start?waitTime="+str(args["waitTimeMin"])+"&ipToUse="+defender["ip"]+"&attackType="+defender["name"]
+                requests.post(topost)
 
             # Queue request to remove containers, once the machines are done
             mainAPI_IP = request.remote_addr
@@ -97,9 +100,20 @@ class Start(Resource):
         else:
             return "ERROR: Campaign already started"
 
+# Get campaign results from attacker machine
+class CampaignResults(Resource):
+    def get(self):
+        attackers = GetCategoryMachines("attacker")
+        results=[]
+        for attacker in attackers:
+            req = requests.get("http://"+attacker["ip"]+":8855/"+"info")
+            results.append(json.loads(req.text))
+        return results 
+
 # -== Endpoints ==-
 api.add_resource(AddMachine, "/addMachine")
 api.add_resource(Start, "/start")
+api.add_resource(CampaignResults, "/campaignResults")
 
 # -== Start server ==-
 # Validate input, if correct then start server

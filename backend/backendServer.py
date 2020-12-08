@@ -77,12 +77,17 @@ def SpawnMachine(MachineName):
     # If it is a Docker machine
     elif str(machineInfo["type"]) == "docker":
         try:
-            retdict = SpawnContainerWithPass(str(machineInfo["imageName"]))
-            spawnID = retdict["id"]
-            passwd  = retdict["password"]
-            print(spawnID+" "+passwd)
+
+            if str(machineInfo["category"]) == "defender":
+                retdict = SpawnContainerWithPass(str(machineInfo["imageName"]))
+                spawnID = retdict["id"]
+                passwd  = retdict["password"]  
+            else:
+                spawnID = SpawnContainer(str(machineInfo["imageName"]))
+                passwd = "No pass"
             spawnIP = GetContainerIP(spawnID)
-            print(MachineName)
+
+
             return {"id": str(spawnID), "ip": str(spawnIP), "category": machineInfo["category"], "shortDescription": machineInfo["shortDescription"], "password":passwd, "name":MachineName}
         except:
             return False
@@ -123,9 +128,6 @@ class SpawnCampaign(Resource):
             for machine in campaignInfo["machines"]:
                 machineInfo = SpawnMachine(machine)
                 spawnInfo.append(machineInfo)
-                print(machineInfo["name"])
-                print(type(machineInfo["name"]))
-                print(LimitInputChars(machineInfo["name"]))
                 topost = "http://" + str(managerIP) + ":8855/addMachine?id=" + LimitInputChars(machineInfo["id"]) + "&ip=" + LimitInputChars(machineInfo["ip"]) + "&category=" + LimitInputChars(machineInfo["category"]) + "&name=" +machineInfo["name"]
                 requests.post(topost)
 
@@ -144,7 +146,6 @@ class SpawnCampaign(Resource):
         else:
             abort(401)
 
-# TODO add status updates for a campaign
 
 # Send names of all campaigns
 class CampaignNames(Resource):
@@ -164,6 +165,15 @@ class CampaignInfo(Resource):
         else:
             return {"name": allInfo["name"], "description": allInfo["description"]}
 
+# Get campaign results
+class CampaignResults(Resource):
+    def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument("id")
+        args = parser.parse_args()
+        toreturn = requests.get("http://"+Base64DecodeString(args["id"])+":8855/"+"campaignResults")        
+        return json.loads(toreturn.text)
+        
 # Removing all files from the machine, called after a successfull campaign
 class CampaignRemoval(Resource):
     def delete(self):
@@ -215,11 +225,13 @@ api.add_resource(CampaignNames, "/campaignNames")
 api.add_resource(CampaignInfo, "/campaignInfo")
 api.add_resource(CampaignRemoval, "/campaignRemove")
 api.add_resource(GetVPNBundle, "/vpnBundle")
+api.add_resource(CampaignResults, "/campaignResults")
+
 
 
 # -== SpawnMicroServices ==-
 authService = SpawnContainer("auth_service:latest")
-authServiceIP = GetContainerIP(authService)
+authServiceIP = GetContainerIP(authService) 
 InitAuthKey(authServiceIP)
 datastoreService = SpawnContainer("datastore_service:latest")
 datastoreServiceIP = GetContainerIP(datastoreService)

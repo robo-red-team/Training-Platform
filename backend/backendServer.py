@@ -7,6 +7,7 @@ import time
 import base64
 import glob
 import os
+import threading
 from flask import Flask, make_response, render_template, request, send_file, abort
 from flask_restful import Resource, Api, reqparse
 from flask_cors import CORS
@@ -23,6 +24,11 @@ waitTimeForContainerSpawn = 3
 
 # -== Helper functions ==-
 
+def WaitAndDeleteFile(fileLocation):
+    time.sleep(5)
+    print(fileLocation, file=sys.stderr)
+    os.remove(fileLocation)
+    
 # Function to return file and mime-type, as a Flask response
 # Note: File has to be in ./templates folder
 def MakeResponse(fileLocation, mimeType):
@@ -206,11 +212,11 @@ class GetVPNBundle(Resource):
             
             # Send and delete file, if any is found
             if len(fileLocations) > 0:
-
-                # TODO: Remove file after being sent
-
                 try:
-                    return send_file(fileLocations[0], as_attachment=True, attachment_filename='RoboRedTeam.vpn')
+                    thread = threading.Thread(target=WaitAndDeleteFile, args=(fileLocations[0],))
+                    thread.start()
+                    #print(fileLocations[0],file=sys.stderr)
+                    return send_file(fileLocations[0], as_attachment=True, attachment_filename='RoboRedTeam.zip')
                 except:
                     abort(404)
             else:

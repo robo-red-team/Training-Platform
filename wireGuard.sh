@@ -9,6 +9,8 @@ apt-get update
 apt-get install -y wireguard docker.io zip unzip
 mkdir /etc/wireguard
 umask 0077 /etc/wireguard
+rm -r /etc/wireguard/*
+rm -r backend/vpnBundles/*
 mkdir backend
 mkdir backend/vpnBundles
 wg genkey | tee /etc/wireguard/wg-server_private.key | wg pubkey > /etc/wireguard/wg-server_public.key

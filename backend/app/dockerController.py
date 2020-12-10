@@ -24,7 +24,7 @@ def GetAllContainers():
 
 def GetContainerIP(ContainerID):
     container = client.containers.get(ContainerID)
-    return str(container.attrs["NetworkSettings"]["Networks"]["bridge"]["IPAddress"])
+    return str(container.attrs["NetworkSettings"]["Networks"]["docker-vpn"]["IPAddress"])
 
 def StopContainer(ContainerID):
     container = client.containers.get(ContainerID)

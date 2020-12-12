@@ -177,7 +177,7 @@ class CampaignResults(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument("id")
         args = parser.parse_args()
-        toreturn = requests.get("http://"+Base64DecodeString(args["id"])+":8855/"+"campaignResults")        
+        toreturn = requests.get("http://" + LimitInputChars(Base64DecodeString(args["id"])) + ":8855/" + "campaignResults")        
         return json.loads(toreturn.text)
         
 # Removing all files from the machine, called after a successfull campaign

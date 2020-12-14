@@ -1,12 +1,12 @@
 [
     {
-        "name": "Test1",
-        "machines": ["dockerTester", "dockerattacker"],
-        "description": "A very nice tester campaign."
+        "name": "Misconfiguretown",
+        "machines": ["2-defender-misconfiguretown", "dockerattacker"],
+        "description": "This apache-php server is badly misconfigured, can you defend it before information leaks?"
     },
     {
-        "name": "Actualcampaign",
+        "name": "SQLInjectionCampaign",
         "machines": ["1-defender-notessqli", "dockerattacker"],
-        "description": "Actualcampaign"
+        "description": "Defend this sql injectable flask site!"
     }
 ]

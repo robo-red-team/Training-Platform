@@ -33,5 +33,14 @@
         "imageName": "campaign-manager_service:latest",
         "category": "infrastructure",
         "shortDescription": "!!! TO BE DESCRIBED !!!"
+    },
+    {
+        "name": "2-defender-misconfiguretown",
+        "type": "docker",
+        "imageName": "1-defender-misconfiguretown:latest",
+        "category": "defender",
+        "shortDescription": "Misconfigured apache-php server" 
     }
+
+
 ]

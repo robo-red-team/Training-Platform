@@ -16,22 +16,22 @@ api = Api(app)
 def LimitInputChars(string):
     return str(re.sub("[^0-9a-zA-Z-=',:.! ]", "", str(string)))
 
-# Get the IP(s) of machines within a category, as list
+# Get the information of machines within a category as list
 def GetCategoryMachines(category):
     global machines
-    attackers = []
+    categoryMachines = []
 
     # Find all of category, and get their IP
     for machine in machines:
         if machine["category"] == str(category):
-            attackers.append(machine)
-    return attackers
+            categoryMachines.append(machine)
+    return categoryMachines
 
 # Base64 encode a string
 def Base64EncodeString(text):
     return base64.b64encode(str(text).encode("ascii")).decode("ascii")
 
-# Used to destroy containers after campaign
+# Used to destroy containers after campaign (intended to be run as thread)
 def DestroyThreads(ip, waitTime):
     global machines
     time.sleep(waitTime)
@@ -45,9 +45,7 @@ timeFromAttackToDestroyMin = 5
 
 # -== Endpoint functionality ==-
 
-
-
-# Each call will add a machine to the machines, list
+# Each call will add a machine to the machines list
 class AddMachine(Resource):
     def post(self):
         parser = reqparse.RequestParser()
@@ -70,24 +68,24 @@ class AddMachine(Resource):
         machines.append(machineInfo)
         return "Machine Added"
 
-# Called to start the campagign
+# Called to start the campagign, will block more machines from being added
 class Start(Resource):
     def post(self):
         global started
         global timeFromAttackToDestroyMin
 
+        # Ensure that campaign is not already active
         if not started:
             started = True
             parser = reqparse.RequestParser()
             parser.add_argument("waitTimeMin")
-            
             args = parser.parse_args()
 
-            # Get attacker IP(s) and send start request to attacker
+            # Get attacker and defender IP(s), and send start request to attacker
             attackers = GetCategoryMachines("attacker")
             defenders = GetCategoryMachines("defender")
             for attacker,defender in zip(attackers,defenders):
-                topost = "http://" + attacker["ip"] + ":8855/start?waitTime="+str(args["waitTimeMin"])+"&ipToUse="+defender["ip"]+"&attackType="+defender["name"]
+                topost = "http://" + LimitInputChars(attacker["ip"]) + ":8855/start?waitTime=" + str(int(args["waitTimeMin"])) + "&ipToUse=" + LimitInputChars(defender["ip"]) + "&attackType=" + LimitInputChars(defender["name"])
                 requests.post(topost)
 
             # Queue request to remove containers, once the machines are done
@@ -105,8 +103,10 @@ class CampaignResults(Resource):
     def get(self):
         attackers = GetCategoryMachines("attacker")
         results=[]
+
+        # Iterate through attackers and get their results 
         for attacker in attackers:
-            req = requests.get("http://"+attacker["ip"]+":8855/"+"info")
+            req = requests.get("http://" + attacker["ip"] + ":8855/info")
             results.append(json.loads(req.text))
         return results 
 

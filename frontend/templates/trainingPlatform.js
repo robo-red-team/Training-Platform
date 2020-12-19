@@ -39,7 +39,7 @@ function FillCampaignInfo() {
 
 // Get campaign info, and show it on the document
 function GetCampaignInfo() {
-    // Remove old info with loading comment
+    // Exchange old info with loading comment
     document.getElementById("campaignInfo").innerHTML = `<p class="text-center text-light">Loading...</p>`
     document.getElementById("spawnedCampaignInfo").innerHTML = ""
 
@@ -72,7 +72,7 @@ function GetCampaignInfo() {
     }
 }
 
-// Get a VPN bundle
+// Get a VPN bundle, by opening a tab quickly with the back-end API endpoint for this
 function GetVPNBundle() {
     // Get key
     const plainKey = document.getElementById("key").value

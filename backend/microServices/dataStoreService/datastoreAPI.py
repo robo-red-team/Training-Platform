@@ -6,14 +6,23 @@ from flask_restful import Resource, Api, reqparse
 app = Flask(__name__)
 api = Api(app)
 
+# -== Params ==-
+port = 8855
+
 # -== Helper functions ==-
+
+# Scrub a name from unnecessary characters
+def GetCleanName(TaintName):
+    return str(re.sub("[^0-9a-zA-Z-]", "", str(TaintName)))
 
 # Function used to return a Json object in a file
 def GetJsonObjFromFile(FileName, Name):
-    cleanName = str(re.sub("[^0-9a-zA-Z-]", "", str(Name)))
+    cleanName = GetCleanName(Name)
+
     # Open file as JSON
     dbFile = open(FileName)
     allObjects = json.load(dbFile)
+
     # Look if the name exists in file
     # TODO: Optimize from linear search to something faster, when DB gets bigger
     for obj in allObjects:
@@ -34,14 +43,12 @@ def GetCampaignNames():
     # Open file as JSON
     dbFile = open("./staticDB/campaigns.json")
     allCampaigns = json.load(dbFile)
-    # Make list
+
+    # Make list, and return it
     campaignList = []
     for campaign in allCampaigns:
         campaignList.append(campaign["name"])
     return campaignList
-
-# -== Params ==-
-port = 8855
 
 # -== Endpoint functionality ==-
 
@@ -52,7 +59,8 @@ class MachineInfo(Resource):
         parser.add_argument("name")
         args = parser.parse_args()
 
-        machine = GetMachineInfo(args["name"])
+        # Get info about the machine, and if it exist then return it
+        machine = GetMachineInfo(GetCleanName(args["name"]))
         if machine == False:
             return "Invalid"
         else:
@@ -65,7 +73,8 @@ class CampaignInfo(Resource):
         parser.add_argument("name")
         args = parser.parse_args()
 
-        campaign = GetCampaignInfo(args["name"])
+        # Get info about the campaign, and if it exist then return it
+        campaign = GetCampaignInfo(GetCleanName(args["name"]))
         if campaign == False:
             return "Invalid"
         else:

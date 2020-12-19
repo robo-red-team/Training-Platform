@@ -24,9 +24,9 @@ waitTimeForContainerSpawn = 3
 
 # -== Helper functions ==-
 
+# Function used to delete a file after a timeout (will be run as a thread)
 def WaitAndDeleteFile(fileLocation):
-    time.sleep(5)
-    print(fileLocation, file=sys.stderr)
+    time.sleep(2)
     os.remove(fileLocation)
     
 # Function to return file and mime-type, as a Flask response
@@ -58,6 +58,8 @@ def GetJSONDataFromAPI(UrlWithParams):
             return False
         else:
             return json.loads(data)
+    else: 
+        return False 
 
 # Initialize key in Auth Service
 def InitAuthKey(MachineIP):
@@ -70,6 +72,7 @@ def InitAuthKey(MachineIP):
 def SpawnMachine(MachineName):
     # Make sure machine exists, and which type to spawn
     machineInfo = GetJSONDataFromAPI("http://" + datastoreServiceIP + ":8855/machineInfo?name=" + str(LimitInputChars(MachineName)))
+
     # If no machine is found
     if machineInfo == False:
         return False
@@ -83,7 +86,7 @@ def SpawnMachine(MachineName):
     # If it is a Docker machine
     elif str(machineInfo["type"]) == "docker":
         try:
-
+            # If a defender machine, then spawn with a password, otherwise spawn "normaly"
             if str(machineInfo["category"]) == "defender":
                 retdict = SpawnContainerWithPass(str(machineInfo["imageName"]))
                 spawnID = retdict["id"]
@@ -93,7 +96,7 @@ def SpawnMachine(MachineName):
                 passwd = "No pass"
             spawnIP = GetContainerIP(spawnID)
 
-
+            # Return relevant data
             return {"id": str(spawnID), "ip": str(spawnIP), "category": machineInfo["category"], "shortDescription": machineInfo["shortDescription"], "password":passwd, "name":MachineName}
         except:
             return False
@@ -104,7 +107,7 @@ def Base64EncodeString(text):
 
 # Base64 decode a string
 def Base64DecodeString(text):
-    return base64.b64decode(text.encode("ascii")).decode("ascii")
+    return base64.b64decode(str(text).encode("ascii")).decode("ascii")
 
 # -== Endpoint functionality ==-
 
@@ -127,14 +130,14 @@ class SpawnCampaign(Resource):
             managerIP = GetContainerIP(manager)
             time.sleep(waitTimeForContainerSpawn)
             # Add info about the campaign manager to it's list of containers
-            requests.post("http://" + str(managerIP) + ":8855/addMachine?id=" + LimitInputChars(manager) + "&ip=" + LimitInputChars(managerIP) + "&category=" + "infrastructure" + "&name=" + "campaignManager")
+            requests.post("http://" + str(managerIP) + ":8855/addMachine?id=" + LimitInputChars(manager) + "&ip=" + LimitInputChars(managerIP) + "&category=infrastructure&name=campaignManager")
             
             # Spawn machines, store data in list, and send info to campaign manager
             spawnInfo = []
             for machine in campaignInfo["machines"]:
                 machineInfo = SpawnMachine(machine)
                 spawnInfo.append(machineInfo)
-                topost = "http://" + str(managerIP) + ":8855/addMachine?id=" + LimitInputChars(machineInfo["id"]) + "&ip=" + LimitInputChars(machineInfo["ip"]) + "&category=" + LimitInputChars(machineInfo["category"]) + "&name=" +machineInfo["name"]
+                topost = "http://" + str(managerIP) + ":8855/addMachine?id=" + LimitInputChars(machineInfo["id"]) + "&ip=" + LimitInputChars(machineInfo["ip"]) + "&category=" + LimitInputChars(machineInfo["category"]) + "&name=" + LimitInputChars(machineInfo["name"])
                 requests.post(topost)
 
             # Ensure service have time to add all data
@@ -152,7 +155,6 @@ class SpawnCampaign(Resource):
         else:
             abort(401)
 
-
 # Send names of all campaigns
 class CampaignNames(Resource):
     def get(self):
@@ -164,6 +166,7 @@ class CampaignInfo(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument("name")
         args = parser.parse_args()
+
         # Get all info, and make sure the name was correct
         allInfo = GetJSONDataFromAPI("http://" + datastoreServiceIP + ":8855/campaignInfo?name=" + str(LimitInputChars(args["name"])))
         if allInfo == False:
@@ -177,7 +180,9 @@ class CampaignResults(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument("id")
         args = parser.parse_args()
-        toreturn = requests.get("http://" + LimitInputChars(Base64DecodeString(args["id"])) + ":8855/" + "campaignResults")        
+
+        # Make request to campaign manager to get status/results
+        toreturn = requests.get("http://" + LimitInputChars(Base64DecodeString(args["id"])) + ":8855/campaignResults")        
         return json.loads(toreturn.text)
         
 # Removing all files from the machine, called after a successfull campaign
@@ -213,9 +218,11 @@ class GetVPNBundle(Resource):
             # Send and delete file, if any is found
             if len(fileLocations) > 0:
                 try:
+                    # Start thread to delete file shortly after being sent
                     thread = threading.Thread(target=WaitAndDeleteFile, args=(fileLocations[0],))
                     thread.start()
-                    #print(fileLocations[0],file=sys.stderr)
+
+                    # Send the file
                     return send_file(fileLocations[0], as_attachment=True, attachment_filename='RoboRedTeam.zip')
                 except:
                     abort(404)
@@ -223,7 +230,6 @@ class GetVPNBundle(Resource):
                 abort(404)
         else:
             abort(401)
-
 
 # -== Endpoints ==-
 api.add_resource(SpawnCampaign, "/campaignSpawn")
@@ -233,17 +239,16 @@ api.add_resource(CampaignRemoval, "/campaignRemove")
 api.add_resource(GetVPNBundle, "/vpnBundle")
 api.add_resource(CampaignResults, "/campaignResults")
 
-
-
 # -== SpawnMicroServices ==-
 authService = SpawnContainer("auth_service:latest")
 authServiceIP = GetContainerIP(authService) 
 InitAuthKey(authServiceIP)
+
 datastoreService = SpawnContainer("datastore_service:latest")
 datastoreServiceIP = GetContainerIP(datastoreService)
 
 # -== Start server ==-
 # Validate input, if correct then start server
-port = sys.argv[1]
+port = int(sys.argv[1])
 if int(port) >= 0 and int(port) <= 65535: 
     app.run(threaded=True, debug=False, port=int(port), host="0.0.0.0")

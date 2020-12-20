@@ -1,0 +1,13 @@
+[Unit]
+Description=RoboRedTeam
+
+[Service]
+Type=simple
+Restart=always
+User=root
+WorkingDirectory=/opt/Training-Platform
+ExecStart=bash start.sh $(cat key.txt)
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target

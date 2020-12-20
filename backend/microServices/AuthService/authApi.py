@@ -16,17 +16,22 @@ apiKey = ""
 port = 8855
 
 # -== Endpoint functionality ==-
+
+# Endpoint used to authenticate, by matching if the key is correct
 class Auth(Resource):
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument("key")
         args = parser.parse_args()
         global apiKey
+
+        # If the key matches what is stored, then return "Valid", otherwise return "Invalid"
         if str(LimitInputChars(args["key"])) == str(apiKey):
             return "Valid" 
         else:
             return "Invalid"
 
+# Endpoint used to initialize key, which will only function once
 class InitKey(Resource):
     def post(self):
         # Only initialize the first time this is called
@@ -35,6 +40,8 @@ class InitKey(Resource):
             parser = reqparse.RequestParser()
             parser.add_argument("key")
             args = parser.parse_args()
+
+            # Set the key, and return success message
             apiKey = str(LimitInputChars(args["key"]))
             return "Key initialized"
         else:

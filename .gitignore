@@ -1,2 +1,4 @@
 __pycache__
 .vagrant
+backend/vpnBundles/
+key.txt

@@ -9,7 +9,8 @@ def GetCleanPath(FolderPath):
 # Ensure that a Vagrantfile actually excists on the given path
 def ValidatePath(FolderPath):
     cleanPath = GetCleanPath(FolderPath)
-    # Look in the folder for the file
+
+    # Look in the folder for the file, and if only one file is found return True
     searchResult = glob.glob(str(cleanPath) + "Vagrantfile", recursive=False)
     if len(searchResult) == 1:
         return True
@@ -19,24 +20,28 @@ def ValidatePath(FolderPath):
 # Function to control vagrant machines (intended as private function)
 def VagrantController(FolderPath, Action):
     cleanPath = GetCleanPath(FolderPath)
+
+    # If the path is valid, then do the desired action
     if ValidatePath(cleanPath):
         v = vagrant.Vagrant(cleanPath)
         
-        # Do desired action
-        if str(Action) == "spawn":
-            v.up()
-        elif str(Action) == "remove":
-            v.destroy()
-        elif str(Action) == "stop":
-            v.halt()
-        elif str(Action) == "ip":
-            return str(v.hostname())
-        else:
-            return "Invalid Option"
+        try: 
+            if str(Action) == "spawn":
+                v.up()
+            elif str(Action) == "remove":
+                v.destroy()
+            elif str(Action) == "stop":
+                v.halt()
+            elif str(Action) == "ip":
+                return str(v.hostname())
+            else:
+                return "Invalid Option"
 
-        return True # as action worked
+            return True # as action worked
+        except:
+            return False
     else:
-        return "Invalid Path"
+        return False
 
 # Spawn/build a Vagrant machine, and run it
 def SpawnVagrantMachine(FolderPath):

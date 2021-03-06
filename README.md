@@ -1,7 +1,7 @@
 # Robo Red Team: Training-Platform
 A training platform for blue team cybersecurity professionals developed as a semester's project during our studies for an MSc in Cybersecurity.
 
-frontEnd.jpg (add on GitHub)
+![The frontend of Robo Red Team Training Platform](images/frontEnd.jpg)
 
 Users go to a webpage where they enter an API-key and then chose a challenge. Then the backend will spawn the corresponding challenge-containers. The platform will then give the user VPN access to the internal network on the machine, from where they will be able to SSH into their containers with the given credentials. Now the goal is to find and mitigate the security flaws in the machine before the timer runs out, and the automated attacker machine will run attacks against the machine. Once the attack-script has run, the users can see if they were successful in their mitigations on the webpage. 
 
@@ -21,11 +21,11 @@ bash start.sh [API key]
 ## Design of the Training Platform
 The platform design is intended to allow for easy scalability, by utilizing a micro-service architecture. 
 
-PlatformStructure.jpg (add on GitHub)
+![The platform structure of Robo Red Team Training Platform](images/PlatformStructure.jpg)
 
 As seen in the figure above, we are utilizing Docker for the micro-services in the backend, along with encapsulation for each challenge to which the users gain access. To run the backend we have chosen to utilize Flask-RESTful as our primary API, which is the same technology we temporarily use as the server of the frontend. 
 
-backendAPI.jpg (add on GitHub)
+![The backend services of Robo Red Team Training Platform](images/backendAPI.jpg)
 
 As seen in the figure above, we have structured the backend into different micro-services. 
 * Firstly we have the "DataStore" service, which acts as a temporary replacement for a database, by storing and serving static information.
@@ -35,7 +35,7 @@ As seen in the figure above, we have structured the backend into different micro
   * The attacker container is the machine that will run an attack-script against the "blue machines", and report back on the status of the attacks.
   * The "blue machines" are the ones who the users will gain access to harden the security of the machines. 
 
-Networking.jpg (add on GitHub)
+![The networking of Robo Red Team Training Platform](images/Networking.jpg)
 
 The above figure displays the communication between the various micro-services from the point where the user accesses the frontend, to the containers associated with a campaign being stopped. 
 
